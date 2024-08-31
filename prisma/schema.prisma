@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,53 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  BASIC
-  MASTER
-}
-
 model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  role       Role     @default(BASIC)
-  created_at DateTime @default(now())
-
-  Company           Company[]
+  id                String              @id @default(uuid())
+  name              String
+  email             String              @unique
+  role              Role                @default(BASIC)
+  created_at        DateTime            @default(now())
   Client            Client[]
+  Company           Company[]
   Item              Item[]
-  UnitTypeCustom    UnitTypeCustom[]
   PaymentModeCustom PaymentModeCustom[]
+  UnitTypeCustom    UnitTypeCustom[]
+  Invoice           Invoice[]
 
   @@map("users")
 }
 
 model Company {
-  id           String @id @default(uuid())
-  name         String
-  cnpj         String @unique
-  phone        String
-  number       String
-  state        String
-  city         String
-  cep          String
-  address      String
-  neighborhood String
-
-  user    User   @relation(fields: [user_id], references: [id])
-  user_id String
+  id             String @id @default(uuid())
+  cnpj           String @unique
+  phone          String
+  state          String
+  city           String
+  cep            String
+  address        String
+  user_id        String
+  neighborhood   String
+  address_number String
+  company_name   String
+  user           User   @relation(fields: [user_id], references: [id])
 
   @@map("companies")
 }
 
 model Client {
-  id             String  @id @default(uuid())
+  id             String    @id @default(uuid())
   type           String
   cpf            String?
   cnpj           String?
   name           String
   company_name   String?
-  emailAddress   String
+  email_address  String
   phone          String
   cep            String
   address        String
@@ -67,11 +55,9 @@ model Client {
   neighborhood   String
   city           String
   state          String
-
-  user    User      @relation(fields: [user_id], references: [id])
-  user_id String
-  
-  Invoice Invoice[]
+  user_id        String
+  user           User      @relation(fields: [user_id], references: [id])
+  Invoice        Invoice[]
 
   @@map("clients")
 }
@@ -84,11 +70,10 @@ model PaymentMode {
 }
 
 model PaymentModeCustom {
-  id   String @id @default(uuid())
-  name String
-
-  user    User   @relation(fields: [user_id], references: [id])
+  id      String @id @default(uuid())
+  name    String
   user_id String
+  user    User   @relation(fields: [user_id], references: [id])
 
   @@map("payments_mode_custom")
 }
@@ -101,11 +86,10 @@ model UnitType {
 }
 
 model UnitTypeCustom {
-  id   String @id @default(uuid())
-  name String
-
-  user    User   @relation(fields: [user_id], references: [id])
+  id      String @id @default(uuid())
+  name    String
   user_id String
+  user    User   @relation(fields: [user_id], references: [id])
 
   @@map("unit_types_custom")
 }
@@ -116,18 +100,50 @@ model Item {
   price       Decimal
   description String
   unit        String
-
-  user    User   @relation(fields: [user_id], references: [id])
-  user_id String
+  user_id     String
+  user        User    @relation(fields: [user_id], references: [id])
 
   @@map("items")
 }
 
 model Invoice {
-  id String @id @default(uuid())
+  id             String  @id @default(uuid())
+  invoice_number String?
+  status         String?
+  notes          String?
+  sub_total      Decimal?
+  total          Decimal?
 
-  client   Client @relation(fields: [client_id], references: [id])
+  created_at DateTime @default(now())
+
+  user_id   String
   client_id String
 
+  user   User   @relation(fields: [user_id], references: [id])
+  client Client @relation(fields: [client_id], references: [id])
+
+  InvoiceItems InvoiceItems[]
+
   @@map("invoices")
+}
+
+model InvoiceItems {
+  id        String  @id @default(uuid())
+  name      String
+  price     Decimal
+  quantity  Decimal
+  unit      String
+  total     Decimal
+
+  created_at DateTime @default(now())
+
+  invoice    Invoice @relation(fields: [invoice_id], references: [id])
+  invoice_id String
+
+  @@map("invoice_items")
+}
+
+enum Role {
+  BASIC
+  MASTER
 }

@@ -4,12 +4,12 @@ import { z } from "zod"
 
 export async function update(request: FastifyRequest, reply: FastifyReply) {
   const updateCompanyParamsSchema = z.object({
-    name: z.string().optional(),
+    company_name: z.string().optional(),
     cnpj: z.string().optional(),
     phone: z.string().optional(),
     cep: z.string().optional(),
     address: z.string().optional(),
-    number: z.string().optional(),
+    address_number: z.string().optional(),
     city: z.string().optional(),
     state: z.string().optional(),
     neighborhood: z.string().optional(),
@@ -21,8 +21,17 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
 
   const { email } = companyParamsSchema.parse(request.params)
 
-  const { name, cnpj, phone, cep, address, number, city, state, neighborhood } =
-    updateCompanyParamsSchema.parse(request.body)
+  const {
+    company_name,
+    cnpj,
+    phone,
+    cep,
+    address,
+    address_number,
+    city,
+    state,
+    neighborhood,
+  } = updateCompanyParamsSchema.parse(request.body)
 
   if (!email) {
     return reply.status(400).send({ error: "Missing email" })
@@ -40,12 +49,12 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
       await prisma.company.updateMany({
         where: { user: { email } },
         data: {
-          name,
+          company_name,
           cnpj,
           phone,
           cep,
           address,
-          number,
+          address_number,
           city,
           state,
           neighborhood,

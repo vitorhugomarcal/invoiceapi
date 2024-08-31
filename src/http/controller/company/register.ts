@@ -4,19 +4,28 @@ import { z } from "zod"
 
 export async function register(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z.object({
-    name: z.string(),
+    company_name: z.string(),
     cnpj: z.string(),
     phone: z.string(),
     cep: z.string(),
     address: z.string(),
-    number: z.string(),
+    address_number: z.string(),
     neighborhood: z.string(),
     city: z.string(),
     state: z.string(),
   })
 
-  const { name, cnpj, phone, state, city, cep, number, address, neighborhood } =
-    registerBodySchema.parse(request.body)
+  const {
+    company_name,
+    cnpj,
+    phone,
+    state,
+    city,
+    cep,
+    address_number,
+    address,
+    neighborhood,
+  } = registerBodySchema.parse(request.body)
 
   const userParamsSchema = z.object({
     email: z.string(),
@@ -36,12 +45,12 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     await prisma.company.create({
       data: {
         user_id: user.id,
-        name,
+        company_name,
         cnpj,
         phone,
         cep,
         address,
-        number,
+        address_number,
         neighborhood,
         city,
         state,

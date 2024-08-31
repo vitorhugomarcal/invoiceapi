@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "invoices" ALTER COLUMN "invoice_number" DROP NOT NULL,
+ALTER COLUMN "notes" DROP NOT NULL,
+ALTER COLUMN "status" DROP NOT NULL,
+ALTER COLUMN "sub_total" DROP NOT NULL,
+ALTER COLUMN "total" DROP NOT NULL;

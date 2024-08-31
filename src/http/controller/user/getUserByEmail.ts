@@ -1,4 +1,4 @@
-import { makeGetUserProfileEmailUseCase } from "@/use-cases/factories/make-user-profile-email-use-case"
+import { prisma } from "@/lib/prisma"
 import { FastifyRequest, FastifyReply } from "fastify"
 import { z } from "zod"
 
@@ -6,15 +6,32 @@ export async function getUserByEmail(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const idExerciseParamsSchema = z.object({
+  const userParamsSchema = z.object({
     email: z.string(),
   })
 
-  const { email } = idExerciseParamsSchema.parse(request.params)
+  const { email } = userParamsSchema.parse(request.params)
 
-  const getUserProfile = makeGetUserProfileEmailUseCase()
-
-  const { user } = await getUserProfile.execute({ email })
-
-  return reply.status(200).send(user || {})
+  if (!email) {
+    return reply.status(400).send({ error: "Missing email" })
+  } else {
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      include: {
+        Company: true,
+        Client: true,
+        Invoice: {
+          include: {
+            client: true,
+          },
+          orderBy: { created_at: "desc" },
+        },
+        Item: true,
+        UnitTypeCustom: true,
+      },
+    })
+    return user
+  }
 }

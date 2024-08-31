@@ -9,8 +9,8 @@ import { refresh } from "./refresh"
 
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
-  app.get("/users/email/:email", getUserByEmail)
   app.post("/sessions", authenticate)
+  app.get("/users/email/:email", getUserByEmail)
   app.patch("/token/refresh", refresh)
 
   // app.get('/me', { onRequest: [verifyJWT] }, profile)

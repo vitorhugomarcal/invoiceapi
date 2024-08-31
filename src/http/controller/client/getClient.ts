@@ -18,7 +18,7 @@ export async function getClient(request: FastifyRequest, reply: FastifyReply) {
         id,
       },
       include: {
-        Invoice: true,
+        Invoice: { orderBy: { created_at: "desc" } },
       },
     })
     return client

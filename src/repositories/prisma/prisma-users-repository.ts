@@ -24,6 +24,18 @@ export class PrismaUsersRepository implements UsersRepository {
       where: {
         id,
       },
+      include: {
+        Company: true,
+        Client: true,
+        Invoice: {
+          include: {
+            client: true,
+          },
+          orderBy: { created_at: "desc" },
+        },
+        Item: true,
+        UnitTypeCustom: true,
+      },
     })
 
     return user
@@ -33,6 +45,18 @@ export class PrismaUsersRepository implements UsersRepository {
     const user = await prisma.user.findUnique({
       where: {
         email,
+      },
+      include: {
+        Company: true,
+        Client: true,
+        Invoice: {
+          include: {
+            client: true,
+          },
+          orderBy: { created_at: "desc" },
+        },
+        Item: true,
+        UnitTypeCustom: true,
       },
     })
     return user
