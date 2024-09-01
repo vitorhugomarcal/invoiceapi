@@ -4,7 +4,7 @@ import { env } from "./env"
 app
   .listen({
     // host: "192.168.1.142",
-    host: "0.0.0.0",
+    host: "15.228.223.51",
     port: env.PORT,
   })
   .then(() => {
