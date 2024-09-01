@@ -17,12 +17,12 @@ import { UnitsRoutes } from "./http/controller/Units/routes"
 
 export const app = fastify()
 
-// app.register(cors, {
-//   origin: ["http://localhost:3333", "http://192.168.1.142:3333"], // specify allowed origins
-//   methods: ["GET", "POST", "PUT", "DELETE"], // specify allowed methods
-//   allowedHeaders: ["Content-Type", "Authorization"], // specify allowed headers
-//   credentials: true, // include credentials such as cookies in requests
-// })
+app.register(cors, {
+  origin: ["http://localhost:3333", "http://192.168.1.142:3333"], // specify allowed origins
+  methods: ["GET", "POST", "PUT", "DELETE"], // specify allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"], // specify allowed headers
+  credentials: true, // include credentials such as cookies in requests
+})
 
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
