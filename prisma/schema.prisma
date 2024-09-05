@@ -36,7 +36,7 @@ model Company {
   neighborhood   String
   address_number String
   company_name   String
-  user           User   @relation(fields: [user_id], references: [id])
+  user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("companies")
 }
@@ -57,7 +57,7 @@ model Client {
   city           String
   state          String
   user_id        String
-  user           User      @relation(fields: [user_id], references: [id])
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   Invoice        Invoice[]
 
   @@map("clients")
@@ -74,7 +74,7 @@ model PaymentModeCustom {
   id      String @id @default(uuid())
   name    String
   user_id String
-  user    User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("payments_mode_custom")
 }
@@ -90,7 +90,7 @@ model UnitTypeCustom {
   id      String @id @default(uuid())
   name    String
   user_id String
-  user    User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("unit_types_custom")
 }
@@ -102,7 +102,7 @@ model Item {
   description String
   unit        String
   user_id     String
-  user        User    @relation(fields: [user_id], references: [id])
+  user        User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("items")
 }
@@ -120,8 +120,8 @@ model Invoice {
   user_id   String
   client_id String
 
-  user   User   @relation(fields: [user_id], references: [id])
-  client Client @relation(fields: [client_id], references: [id])
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [client_id], references: [id], onDelete: Cascade)
 
   InvoiceItems InvoiceItems[]
 
@@ -138,7 +138,7 @@ model InvoiceItems {
 
   created_at DateTime @default(now())
 
-  invoice    Invoice @relation(fields: [invoice_id], references: [id])
+  invoice    Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   invoice_id String
 
   @@map("invoice_items")
