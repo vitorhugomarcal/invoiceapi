@@ -6,6 +6,7 @@ import { updateRole } from "./updateRole"
 import { verifyJWT } from "@/http/middlewares/verify-jwt"
 import { authenticate } from "./authenticate"
 import { refresh } from "./refresh"
+import { remove } from "./remove"
 
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
@@ -15,6 +16,7 @@ export async function userRoutes(app: FastifyInstance) {
 
   // app.get('/me', { onRequest: [verifyJWT] }, profile)
   app.put("/users/:userId", update)
+  app.delete("/users/:userId", remove)
   app.patch("/users/role/:userId", updateRole)
   // app.delete('/users/:userId', { onRequest: [verifyJWT] }, remove)
   // app.get('/users/:userId', { onRequest: [verifyJWT] }, show)
