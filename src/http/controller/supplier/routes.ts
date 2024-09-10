@@ -13,7 +13,7 @@ export async function supplierRoutes(app: FastifyInstance) {
   app.post("/supplier/:userId", register)
   app.post("/supplier/addUser/:supplierId", registerUser)
   app.get("/supplier/:id", getSupplier)
-  app.delete("/supplier/:supplierId", remove)
+  app.delete("/supplier/:supplierId/:userId", remove)
   app.get("/supplier/cnpj/:cnpj", getSupplierByCNPJ)
   app.get("/supplier/user/:userId", getSupplierByUser)
 }
