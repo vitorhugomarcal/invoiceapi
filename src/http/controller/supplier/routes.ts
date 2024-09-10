@@ -5,11 +5,15 @@ import { register } from "./register"
 import { getSupplierByUser } from "./getSupplierByUser"
 import { getSupplierByCNPJ } from "./getSupplierByCNPJ"
 import { getSupplier } from "./getSupplier"
+import { remove } from "./remove"
+import { registerUser } from "./registerUser"
 
 export async function supplierRoutes(app: FastifyInstance) {
   app.put("/supplier/:id", update)
   app.post("/supplier/:userId", register)
+  app.post("/supplier/addUser/:supplierID", registerUser)
   app.get("/supplier/:id", getSupplier)
+  app.delete("/supplier/:supplierId", remove)
   app.get("/supplier/cnpj/:cnpj", getSupplierByCNPJ)
   app.get("/supplier/user/:userId", getSupplierByUser)
 }
