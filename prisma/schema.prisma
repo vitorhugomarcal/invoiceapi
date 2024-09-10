@@ -16,11 +16,11 @@ model User {
   updated_at        DateTime            @default(now())
   Client            Client[]
   Company           Company[]
-  Supplier           Supplier[]
   Item              Item[]
   PaymentModeCustom PaymentModeCustom[]
   UnitTypeCustom    UnitTypeCustom[]
   Invoice           Invoice[]
+  SupplierUser      SupplierUser[]  
 
   @@map("users")
 }
@@ -42,6 +42,16 @@ model Company {
   @@map("companies")
 }
 
+model SupplierUser {
+  supplier_id String
+  user_id     String
+
+  supplier    Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([supplier_id, user_id]) // Chave composta para garantir unicidade da combinação
+}
+
 model Supplier {
   id             String @id @default(uuid())
   cnpj           String @unique
@@ -50,11 +60,10 @@ model Supplier {
   city           String
   cep            String
   address        String
-  user_id        String
   neighborhood   String
   address_number String
   company_name   String
-  user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  users          SupplierUser[] 
 
   @@map("sluppliers")
 }
@@ -126,7 +135,7 @@ model Item {
 }
 
 model Invoice {
-  id             String  @id @default(uuid())
+  id             String   @id @default(uuid())
   invoice_number String?
   status         String?
   notes          String?
@@ -147,12 +156,12 @@ model Invoice {
 }
 
 model InvoiceItems {
-  id        String  @id @default(uuid())
-  name      String
-  price     Decimal
-  quantity  Decimal
-  unit      String
-  total     Decimal
+  id       String  @id @default(uuid())
+  name     String
+  price    Decimal
+  quantity Decimal
+  unit     String
+  total    Decimal
 
   created_at DateTime @default(now())
 

@@ -35,16 +35,37 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   const existingSupplier = await prisma.supplier.findUnique({ where: { cnpj } })
 
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    return reply.status(404).send({ error: "User not found" })
+  }
+
   if (existingSupplier) {
-    return reply.status(409).send({ error: "Supplier already exists" })
-  } else {
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (!user) {
-      return reply.status(404).send({ error: "User not found" })
+    const supplierUserExists = await prisma.supplierUser.findUnique({
+      where: {
+        supplier_id_user_id: {
+          supplier_id: existingSupplier.id,
+          user_id: user.id,
+        },
+      },
+    })
+    if (supplierUserExists) {
+      return reply
+        .status(409)
+        .send({ error: "Supplier is already associated with this user" })
     }
-    await prisma.supplier.create({
+    await prisma.supplierUser.create({
       data: {
+        supplier_id: existingSupplier.id,
         user_id: user.id,
+      },
+    })
+    return reply
+      .status(200)
+      .send({ message: "Supplier associated with the user" })
+  } else {
+    const newSupplier = await prisma.supplier.create({
+      data: {
         company_name,
         cnpj,
         phone,
@@ -56,7 +77,16 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         state,
       },
     })
-  }
 
-  return reply.status(201).send()
+    await prisma.supplierUser.create({
+      data: {
+        supplier_id: newSupplier.id,
+        user_id: user.id,
+      },
+    })
+
+    return reply
+      .status(201)
+      .send({ message: "Supplier created and associated with the user" })
+  }
 }
