@@ -30,13 +30,19 @@ export async function getUserByEmail(
         },
         Item: true,
         UnitTypeCustom: true,
-        SupplierUser: {
-          include: {
-            supplier: true,
-          },
-        },
       },
     })
-    return user
+
+    const suppliers = await prisma.supplierUser.findMany({
+      where: {
+        user_id: user?.id, // Supondo que você tenha o `userId`
+      },
+      include: {
+        supplier: true, // Incluir os detalhes do fornecedor
+      },
+    })
+
+    const Supplier = suppliers.map((entry) => entry.supplier)
+    return { user, Supplier }
   }
 }
