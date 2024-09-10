@@ -8,6 +8,6 @@ import { getSupplierByCNPJ } from "./getSupplierByCNPJ"
 export async function supplierRoutes(app: FastifyInstance) {
   app.put("/supplier/:id", update)
   app.post("/supplier/:userId", register)
-  app.get("/supplier/:cnpj", getSupplierByCNPJ)
-  app.get("/supplier/:userId", getSupplierByUser)
+  app.get("/supplier/cnpj/:cnpj", getSupplierByCNPJ)
+  app.get("/supplier/user/:userId", getSupplierByUser)
 }
