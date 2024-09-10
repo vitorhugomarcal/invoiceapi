@@ -30,6 +30,7 @@ export async function getUserByEmail(
         },
         Item: true,
         UnitTypeCustom: true,
+        SupplierUser: true,
       },
     })
     return user
