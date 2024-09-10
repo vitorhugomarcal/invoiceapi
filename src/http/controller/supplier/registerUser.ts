@@ -7,10 +7,10 @@ export async function registerUser(
   reply: FastifyReply
 ) {
   const registerBodySchema = z.object({
-    user_id: z.string(),
+    userId: z.string(),
   })
 
-  const { user_id } = registerBodySchema.parse(request.body)
+  const { userId } = registerBodySchema.parse(request.body)
 
   const supplierParamsSchema = z.object({
     supplierId: z.string(),
@@ -28,7 +28,7 @@ export async function registerUser(
   }
 
   // Verifica se o usuário existe
-  const user = await prisma.user.findUnique({ where: { id: user_id } })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) {
     return reply.status(404).send({ error: "User not found" })
   }
@@ -38,7 +38,7 @@ export async function registerUser(
     where: {
       supplier_id_user_id: {
         supplier_id: supplierId,
-        user_id: user_id,
+        user_id: userId,
       },
     },
   })
@@ -53,7 +53,7 @@ export async function registerUser(
   await prisma.supplierUser.create({
     data: {
       supplier_id: supplierId,
-      user_id: user_id,
+      user_id: userId,
     },
   })
 
