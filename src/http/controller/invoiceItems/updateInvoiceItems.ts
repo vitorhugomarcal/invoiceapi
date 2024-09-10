@@ -9,34 +9,36 @@ export async function updateInvoiceItems(
   const updateItemParamsSchema = z.object({
     name: z.string().optional(),
     price: z.number().min(0).optional(),
+    quantity: z.number().min(0).optional(),
     total: z.number().min(0).optional(),
     unit: z.string().optional(),
   })
 
   const itemParamsSchema = z.object({
-    itemId: z.string(),
+    itemInvoiceId: z.string(),
   })
 
-  const { itemId } = itemParamsSchema.parse(request.params)
+  const { itemInvoiceId } = itemParamsSchema.parse(request.params)
 
-  const { name, price, unit, total } = updateItemParamsSchema.parse(
+  const { name, price, quantity, unit, total } = updateItemParamsSchema.parse(
     request.body
   )
 
-  if (!itemId) {
+  if (!itemInvoiceId) {
     return reply.status(400).send({ error: "Missing userId" })
   } else {
     const user = await prisma.invoiceItems.findUnique({
-      where: { id: itemId },
+      where: { id: itemInvoiceId },
     })
     if (!user) {
       return reply.status(404).send({ error: "User not found" })
     } else {
       await prisma.invoiceItems.update({
-        where: { id: itemId },
+        where: { id: itemInvoiceId },
         data: {
           name,
           price,
+          quantity,
           unit,
           total,
         },
