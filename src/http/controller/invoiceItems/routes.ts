@@ -8,5 +8,5 @@ export async function invoiceItemsRoutes(app: FastifyInstance) {
   app.post("/invoice/items/:invoiceId", register)
   app.get("/invoice/items/:invoiceId", getByInvoice)
   app.delete("/invoice/items/:itemId", deleteItemByInvoice)
-  app.put("/items/invoice/:itemId", updateInvoiceItems)
+  app.put("/items/invoice/:itemInvoiceId", updateInvoiceItems)
 }
