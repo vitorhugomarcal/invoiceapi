@@ -16,6 +16,7 @@ model User {
   updated_at        DateTime            @default(now())
   Client            Client[]
   Company           Company[]
+  Supplier           Supplier[]
   Item              Item[]
   PaymentModeCustom PaymentModeCustom[]
   UnitTypeCustom    UnitTypeCustom[]
@@ -39,6 +40,23 @@ model Company {
   user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("companies")
+}
+
+model Supplier {
+  id             String @id @default(uuid())
+  cnpj           String @unique
+  phone          String
+  state          String
+  city           String
+  cep            String
+  address        String
+  user_id        String
+  neighborhood   String
+  address_number String
+  company_name   String
+  user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("sluppliers")
 }
 
 model Client {

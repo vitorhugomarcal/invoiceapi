@@ -14,6 +14,7 @@ import { invoiceItemsRoutes } from "./http/controller/invoiceItems/routes"
 import { invoiceRoutes } from "./http/controller/invoice/routes"
 import { ItensRoutes } from "./http/controller/Itens/routes"
 import { UnitsRoutes } from "./http/controller/Units/routes"
+import { supplierRoutes } from "./http/controller/supplier/routes"
 
 export const app = fastify()
 
@@ -43,6 +44,7 @@ app.register(UnitsRoutes)
 app.register(clientRoutes)
 app.register(companyRoutes)
 app.register(invoiceRoutes)
+app.register(supplierRoutes)
 app.register(invoiceItemsRoutes)
 
 app.setErrorHandler((error, _request, reply) => {
