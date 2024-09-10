@@ -11,7 +11,7 @@ import { registerUser } from "./registerUser"
 export async function supplierRoutes(app: FastifyInstance) {
   app.put("/supplier/:id", update)
   app.post("/supplier/:userId", register)
-  app.post("/supplier/addUser/:supplierID", registerUser)
+  app.post("/supplier/addUser/:supplierId", registerUser)
   app.get("/supplier/:id", getSupplier)
   app.delete("/supplier/:supplierId", remove)
   app.get("/supplier/cnpj/:cnpj", getSupplierByCNPJ)
