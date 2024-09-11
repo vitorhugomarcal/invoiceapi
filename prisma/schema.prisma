@@ -20,7 +20,8 @@ model User {
   PaymentModeCustom PaymentModeCustom[]
   UnitTypeCustom    UnitTypeCustom[]
   Invoice           Invoice[]
-  SupplierUser      SupplierUser[]  
+  SupplierUser      SupplierUser[]
+  Estimate          Estimate[]
 
   @@map("users")
 }
@@ -46,15 +47,15 @@ model SupplierUser {
   supplier_id String
   user_id     String
 
-  supplier    Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  supplier Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([supplier_id, user_id]) // Chave composta para garantir unicidade da combinação
 }
 
 model Supplier {
-  id             String @id @default(uuid())
-  cnpj           String @unique
+  id             String         @id @default(uuid())
+  cnpj           String         @unique
   phone          String
   state          String
   city           String
@@ -63,7 +64,8 @@ model Supplier {
   neighborhood   String
   address_number String
   company_name   String
-  users          SupplierUser[] 
+  users          SupplierUser[]
+  Estimate       Estimate[]
 
   @@map("sluppliers")
 }
@@ -169,6 +171,37 @@ model InvoiceItems {
   invoice_id String
 
   @@map("invoice_items")
+}
+
+model Estimate {
+  id              String  @id @default(uuid())
+  estimate_number String?
+  status          String?
+  notes           String?
+  user_id         String
+  supplier_id     String
+
+  created_at DateTime @default(now())
+
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  supplier Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
+
+  EstimateItems EstimateItems[]
+
+  @@map("estimates")
+}
+
+model EstimateItems {
+  id       String  @id @default(uuid())
+  name     String
+  quantity Decimal
+
+  created_at DateTime @default(now())
+
+  estimate    Estimate @relation(fields: [estimate_id], references: [id], onDelete: Cascade)
+  estimate_id String
+
+  @@map("estimate_items")
 }
 
 enum Role {
