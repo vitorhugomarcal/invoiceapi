@@ -8,9 +8,10 @@ export async function getSupplier(
 ) {
   const supplierParamsSchema = z.object({
     id: z.string(),
+    userId: z.string(),
   })
 
-  const { id } = supplierParamsSchema.parse(request.params)
+  const { id, userId } = supplierParamsSchema.parse(request.params)
 
   if (!id) {
     return reply.status(400).send({ error: "Missing email" })
@@ -20,7 +21,11 @@ export async function getSupplier(
         id,
       },
       include: {
-        Estimate: true,
+        Estimate: {
+          where: {
+            user_id: userId,
+          },
+        },
       },
     })
     return supplier
