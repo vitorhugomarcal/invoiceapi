@@ -20,6 +20,10 @@ export async function getByEstimate(
         estimate_id: estimateId,
       },
     })
-    return estimateItems
+    if (!estimateItems) {
+      return []
+    } else {
+      return estimateItems
+    }
   }
 }
