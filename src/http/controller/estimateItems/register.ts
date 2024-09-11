@@ -16,19 +16,13 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   const { estimateId } = estimateParamsSchema.parse(request.params)
 
-  const estimate = await prisma.estimate.findUnique({
-    where: { id: estimateId },
-  })
-  if (!estimate) {
-    return reply.status(404).send({ error: "Client not found" })
-  }
   await prisma.estimateItems.create({
     data: {
-      estimate_id: estimate.id,
+      estimate_id: estimateId,
       name,
       quantity,
     },
   })
 
-  return reply.status(201).send()
+  return reply.status(201).send({ message: "Item adicionado com sucesso" })
 }
