@@ -21,6 +21,7 @@ export async function getByEstimate(
       },
       include: {
         EstimateItems: true,
+        supplier: true,
       },
     })
     return invoice
