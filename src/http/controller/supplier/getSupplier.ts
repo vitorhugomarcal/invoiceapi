@@ -19,6 +19,9 @@ export async function getSupplier(
       where: {
         id,
       },
+      include: {
+        Estimate: true,
+      },
     })
     return supplier
   }
