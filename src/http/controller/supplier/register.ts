@@ -10,6 +10,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     cep: z.string(),
     address: z.string(),
     address_number: z.string(),
+    email_address: z.string().email(),
     neighborhood: z.string(),
     city: z.string(),
     state: z.string(),
@@ -23,6 +24,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     city,
     cep,
     address_number,
+    email_address,
     address,
     neighborhood,
   } = registerBodySchema.parse(request.body)
@@ -72,6 +74,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         cep,
         address,
         address_number,
+        email_address,
         neighborhood,
         city,
         state,
