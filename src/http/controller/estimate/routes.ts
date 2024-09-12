@@ -5,6 +5,7 @@ import { remove } from "./remove"
 import { register } from "./register"
 import { getByEstimate } from "./getByEstimate"
 import { getEstimateBySupplier } from "./getEstimateBySupplier"
+import { getAllByUser } from "./getAllByUser"
 
 export async function estimateRoutes(app: FastifyInstance) {
   app.post("/estimate/:supplierId/:userId", register)
@@ -12,4 +13,5 @@ export async function estimateRoutes(app: FastifyInstance) {
   app.delete("/estimate/:estimateId", remove)
   app.get("/estimate/:estimateId", getByEstimate)
   app.get("/estimates/supplier/:supplierId/:userId", getEstimateBySupplier)
+  app.get("/estimates/:userId", getAllByUser)
 }
