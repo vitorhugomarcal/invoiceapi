@@ -16,10 +16,10 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
   })
 
   const companyParamsSchema = z.object({
-    email: z.string(),
+    userId: z.string(),
   })
 
-  const { email } = companyParamsSchema.parse(request.params)
+  const { userId } = companyParamsSchema.parse(request.params)
 
   const {
     company_name,
@@ -33,21 +33,19 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
     neighborhood,
   } = updateCompanyParamsSchema.parse(request.body)
 
-  if (!email) {
+  if (!userId) {
     return reply.status(400).send({ error: "Missing email" })
   } else {
     const company = await prisma.company.findFirst({
       where: {
-        user: {
-          email,
-        },
+       owner_id: userId
       },
     })
     if (!company) {
       return reply.status(404).send({ error: "Company not found" })
     } else {
       await prisma.company.updateMany({
-        where: { user: { email } },
+        where: { owner_id:  company.id },
         data: {
           company_name,
           cnpj,

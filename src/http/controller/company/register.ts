@@ -28,23 +28,23 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   } = registerBodySchema.parse(request.body)
 
   const userParamsSchema = z.object({
-    email: z.string(),
+    userId: z.string(),
   })
 
-  const { email } = userParamsSchema.parse(request.params)
+  const { userId } = userParamsSchema.parse(request.params)
 
   const existingCompany = await prisma.company.findUnique({ where: { cnpj } })
 
   if (existingCompany) {
     return reply.status(409).send({ error: "Company already exists" })
   } else {
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
       return reply.status(404).send({ error: "User not found" })
     }
     await prisma.company.create({
       data: {
-        user_id: user.id,
+        owner_id: user.id,
         company_name,
         cnpj,
         phone,

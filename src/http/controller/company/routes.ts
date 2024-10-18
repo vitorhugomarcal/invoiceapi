@@ -1,12 +1,12 @@
 import { FastifyInstance } from "fastify"
 import { register } from "./register"
-import { getCompanyByEmail } from "./getCompanyByEmail"
+import { getCompanyByOwner } from "./getCompanyByOwner"
 import { update } from "./update"
 import { getCompanyByCNPJ } from "./getCompanyByCNPJ"
 
 export async function companyRoutes(app: FastifyInstance) {
-  app.post("/company/:email", register)
-  app.get("/company/:email", getCompanyByEmail)
+  app.post("/company/:userId", register)
+  app.get("/company/:userId", getCompanyByOwner)
   app.get("/company/cnpj/:cnpj", getCompanyByCNPJ)
-  app.put("/company/:email", update)
+  app.put("/company/:userId", update)
 }

@@ -8,31 +8,34 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  role       Role     @default(BASIC)
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  id         String  @id @default(uuid())
+  name       String?
+  email      String  @unique
+  role       Role    @default(BASIC)
+  company_id String? @map("company_id")
 
-  Company    Company? @relation(fields: [company_id], references: [id])
-  company_id String?  @map("company_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  Company Company? @relation(fields: [company_id], references: [id])
+
+  PendingUserInvites PendingUser[]
 
   @@map("users")
 }
 
 model Company {
-  id             String @id @default(uuid())
-  cnpj           String @unique
+  id             String  @id @default(uuid())
+  cnpj           String  @unique
   phone          String
   state          String
   city           String
   cep            String
   address        String
-  user_id        String
   neighborhood   String
   address_number String
   company_name   String
+  owner_id       String?
 
   user              User[]
   item              Item[]
@@ -42,8 +45,23 @@ model Company {
   estimate          Estimate[]
   supplierUser      SupplierUser[]
   client            Client[]
+  pendingUsers      PendingUser[]
 
   @@map("companies")
+}
+
+model PendingUser {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  company_id String
+  invited_by String
+  createdAt  DateTime @default(now())
+
+  invitedBy User @relation(fields: [invited_by], references: [id], onDelete: Cascade)
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@map("pending_users")
 }
 
 model SupplierUser {
@@ -155,7 +173,7 @@ model Invoice {
   notes          String?
   sub_total      Decimal?
   total          Decimal?
-  created_at     DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   invoiceItems InvoiceItems[]
 
@@ -169,13 +187,13 @@ model Invoice {
 }
 
 model InvoiceItems {
-  id         String   @id @default(uuid())
-  name       String
-  price      Decimal
-  quantity   Decimal
-  unit       String
-  total      Decimal
-  created_at DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  price     Decimal
+  quantity  Decimal
+  unit      String
+  total     Decimal
+  createdAt DateTime @default(now())
 
   invoice    Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   invoice_id String  @map("invoice_id")
@@ -188,7 +206,7 @@ model Estimate {
   estimate_number String?
   status          String?
   notes           String?
-  created_at      DateTime @default(now())
+  createdAt       DateTime @default(now())
 
   estimateItems EstimateItems[]
 
@@ -202,10 +220,10 @@ model Estimate {
 }
 
 model EstimateItems {
-  id         String   @id @default(uuid())
-  name       String
-  quantity   Decimal
-  created_at DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  quantity  Decimal
+  createdAt DateTime @default(now())
 
   estimate    Estimate @relation(fields: [estimate_id], references: [id], onDelete: Cascade)
   estimate_id String   @map("estimate_id")
