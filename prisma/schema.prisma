@@ -8,20 +8,15 @@ datasource db {
 }
 
 model User {
-  id                String              @id @default(uuid())
-  name              String
-  email             String              @unique
-  role              Role                @default(BASIC)
-  created_at        DateTime            @default(now())
-  updated_at        DateTime            @default(now())
-  Client            Client[]
-  Company           Company[]
-  Item              Item[]
-  PaymentModeCustom PaymentModeCustom[]
-  UnitTypeCustom    UnitTypeCustom[]
-  Invoice           Invoice[]
-  SupplierUser      SupplierUser[]
-  Estimate          Estimate[]
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  role       Role     @default(BASIC)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  Company    Company? @relation(fields: [company_id], references: [id])
+  company_id String?  @map("company_id")
 
   @@map("users")
 }
@@ -38,7 +33,15 @@ model Company {
   neighborhood   String
   address_number String
   company_name   String
-  user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  user              User[]
+  item              Item[]
+  paymentModeCustom PaymentModeCustom[]
+  unitTypeCustom    UnitTypeCustom[]
+  invoice           Invoice[]
+  estimate          Estimate[]
+  supplierUser      SupplierUser[]
+  client            Client[]
 
   @@map("companies")
 }
@@ -48,14 +51,16 @@ model SupplierUser {
   user_id     String
 
   supplier Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@id([supplier_id, user_id]) // Chave composta para garantir unicidade da combinação
+  Company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  @@id([supplier_id, user_id])
 }
 
 model Supplier {
-  id             String         @id @default(uuid())
-  cnpj           String         @unique
+  id             String @id @default(uuid())
+  cnpj           String @unique
   phone          String
   state          String
   city           String
@@ -65,14 +70,15 @@ model Supplier {
   address_number String
   company_name   String
   email_address  String @default("")
-  users          SupplierUser[]
-  Estimate       Estimate[]
+
+  supplierUser SupplierUser[]
+  estimate     Estimate[]
 
   @@map("sluppliers")
 }
 
 model Client {
-  id             String    @id @default(uuid())
+  id             String  @id @default(uuid())
   type           String
   cpf            String?
   cnpj           String?
@@ -86,9 +92,11 @@ model Client {
   neighborhood   String
   city           String
   state          String
-  user_id        String
-  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  Invoice        Invoice[]
+
+  invoice Invoice[]
+
+  company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String?
 
   @@map("clients")
 }
@@ -101,10 +109,11 @@ model PaymentMode {
 }
 
 model PaymentModeCustom {
-  id      String @id @default(uuid())
-  name    String
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id   String @id @default(uuid())
+  name String
+
+  company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String?  @map("company_id")
 
   @@map("payments_mode_custom")
 }
@@ -117,10 +126,11 @@ model UnitType {
 }
 
 model UnitTypeCustom {
-  id      String @id @default(uuid())
-  name    String
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id   String @id @default(uuid())
+  name String
+
+  company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String?  @map("company_id")
 
   @@map("unit_types_custom")
 }
@@ -131,8 +141,9 @@ model Item {
   price       Decimal
   description String
   unit        String
-  user_id     String
-  user        User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String?  @map("company_id")
 
   @@map("items")
 }
@@ -144,63 +155,60 @@ model Invoice {
   notes          String?
   sub_total      Decimal?
   total          Decimal?
+  created_at     DateTime @default(now())
 
-  created_at DateTime @default(now())
+  invoiceItems InvoiceItems[]
 
-  user_id   String
-  client_id String
+  company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String?  @map("company_id")
 
-  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  client Client @relation(fields: [client_id], references: [id], onDelete: Cascade)
-
-  InvoiceItems InvoiceItems[]
+  client    Client? @relation(fields: [client_id], references: [id])
+  client_id String? @map("client_id")
 
   @@map("invoices")
 }
 
 model InvoiceItems {
-  id       String  @id @default(uuid())
-  name     String
-  price    Decimal
-  quantity Decimal
-  unit     String
-  total    Decimal
-
+  id         String   @id @default(uuid())
+  name       String
+  price      Decimal
+  quantity   Decimal
+  unit       String
+  total      Decimal
   created_at DateTime @default(now())
 
   invoice    Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
-  invoice_id String
+  invoice_id String  @map("invoice_id")
 
   @@map("invoice_items")
 }
 
 model Estimate {
-  id              String  @id @default(uuid())
+  id              String   @id @default(uuid())
   estimate_number String?
   status          String?
   notes           String?
-  user_id         String
-  supplier_id     String
+  created_at      DateTime @default(now())
 
-  created_at DateTime @default(now())
+  estimateItems EstimateItems[]
 
-  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  supplier Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
+  supplier    Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
+  supplier_id String
 
-  EstimateItems EstimateItems[]
+  company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String?  @map("company_id")
 
   @@map("estimates")
 }
 
 model EstimateItems {
-  id       String  @id @default(uuid())
-  name     String
-  quantity Decimal
-
+  id         String   @id @default(uuid())
+  name       String
+  quantity   Decimal
   created_at DateTime @default(now())
 
   estimate    Estimate @relation(fields: [estimate_id], references: [id], onDelete: Cascade)
-  estimate_id String
+  estimate_id String   @map("estimate_id")
 
   @@map("estimate_items")
 }
