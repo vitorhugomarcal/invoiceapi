@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { register } from "./register"
-import { getUserByEmail } from "./getUserByEmail"
+import { getUserById } from "./getUserById"
 import { update } from "./update"
 import { updateRole } from "./updateRole"
 import { verifyJWT } from "@/http/middlewares/verify-jwt"
@@ -11,7 +11,7 @@ import { remove } from "./remove"
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
   app.post("/sessions", authenticate)
-  app.get("/users/email/:email", getUserByEmail)
+  app.get("/users/email/:userId", getUserById)
   app.patch("/token/refresh", refresh)
 
   // app.get('/me', { onRequest: [verifyJWT] }, profile)
