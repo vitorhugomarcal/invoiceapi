@@ -12,7 +12,7 @@ model User {
   name       String?
   email      String  @unique
   role       Role    @default(BASIC)
-  company_id String? @map("company_id")
+  company_id String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @map("updated_at")
