@@ -42,7 +42,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     if (!user) {
       return reply.status(404).send({ error: "User not found" })
     }
-    await prisma.company.create({
+    const company = await prisma.company.create({
       data: {
         owner_id: user.id,
         company_name,
@@ -56,6 +56,15 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         state,
       },
     })
+
+    if (company) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          company_id: company.id,
+        },
+      })
+    }
   }
 
   return reply.status(201).send()
