@@ -2,28 +2,28 @@ import { prisma } from "@/lib/prisma"
 import { FastifyRequest, FastifyReply } from "fastify"
 import { z } from "zod"
 
-export async function getSupplierByUser(
+export async function getSupplierByCompany(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const supplierParamsSchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { userId } = supplierParamsSchema.parse(request.params)
+  const { companyId } = supplierParamsSchema.parse(request.params)
 
-  // Verificar se o userId está presente
-  if (!userId) {
-    return reply.status(400).send({ error: "Missing userId" })
+  // Verificar se o companyId está presente
+  if (!companyId) {
+    return reply.status(400).send({ error: "Missing companyId" })
   }
 
   try {
     // Buscar fornecedores relacionados ao usuário via tabela SupplierUser
     const suppliers = await prisma.supplier.findMany({
       where: {
-        users: {
+        supplierUser: {
           some: {
-            user_id: userId,
+            company_id: companyId,
           },
         },
       },

@@ -66,14 +66,13 @@ model PendingUser {
 
 model SupplierUser {
   supplier_id String
-  user_id     String
+  company_id  String
 
   supplier Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
 
-  Company   Company? @relation(fields: [companyId], references: [id])
-  companyId String?
+  Company Company? @relation(fields: [company_id], references: [id])
 
-  @@id([supplier_id, user_id])
+  @@id([supplier_id, company_id])
 }
 
 model Supplier {

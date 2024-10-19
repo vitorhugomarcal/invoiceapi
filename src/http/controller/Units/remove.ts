@@ -14,5 +14,6 @@ export async function remove(request: FastifyRequest, reply: FastifyReply) {
   }
 
   await prisma.unitTypeCustom.delete({ where: { id: unitId } })
+
   return reply.status(201).send()
 }

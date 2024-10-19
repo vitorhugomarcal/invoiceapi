@@ -30,24 +30,24 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   } = registerBodySchema.parse(request.body)
 
   const supplierParamsSchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { userId } = supplierParamsSchema.parse(request.params)
+  const { companyId } = supplierParamsSchema.parse(request.params)
 
   const existingSupplier = await prisma.supplier.findUnique({ where: { cnpj } })
 
-  const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (!user) {
-    return reply.status(404).send({ error: "User not found" })
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+  if (!company) {
+    return reply.status(404).send({ error: "Company not found" })
   }
 
   if (existingSupplier) {
     const supplierUserExists = await prisma.supplierUser.findUnique({
       where: {
-        supplier_id_user_id: {
+        supplier_id_company_id: {
           supplier_id: existingSupplier.id,
-          user_id: user.id,
+          company_id: company.id,
         },
       },
     })
@@ -59,7 +59,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     await prisma.supplierUser.create({
       data: {
         supplier_id: existingSupplier.id,
-        user_id: user.id,
+        company_id: company.id,
       },
     })
     return reply
@@ -84,7 +84,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     await prisma.supplierUser.create({
       data: {
         supplier_id: newSupplier.id,
-        user_id: user.id,
+        company_id: company.id,
       },
     })
 
