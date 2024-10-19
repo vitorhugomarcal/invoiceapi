@@ -20,6 +20,9 @@ export async function getUserById(
         id: userId,
       },
     })
+    if (!user) {
+      return reply.status(404).send({ error: "User not found" })
+    }
     return user
   }
 }

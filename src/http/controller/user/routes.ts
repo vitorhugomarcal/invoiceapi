@@ -11,7 +11,7 @@ import { remove } from "./remove"
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
   app.post("/sessions", authenticate)
-  app.get("/users/email/:userId", getUserById)
+  app.get("/users/:userId", getUserById)
   app.patch("/token/refresh", refresh)
 
   // app.get('/me', { onRequest: [verifyJWT] }, profile)
