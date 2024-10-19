@@ -12,15 +12,14 @@ export async function getClient(request: FastifyRequest, reply: FastifyReply) {
 
   if (!id) {
     return reply.status(400).send({ error: "Missing id" })
-  } else {
-    const client = await prisma.client.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        Invoice: { orderBy: { created_at: "desc" } },
-      },
-    })
-    return client
   }
+  const client = await prisma.client.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      invoice: true,
+    },
+  })
+  return client
 }
