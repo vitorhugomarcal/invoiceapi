@@ -11,8 +11,8 @@ export async function remove(request: FastifyRequest, reply: FastifyReply) {
 
   if (!unitId) {
     return reply.status(400).send({ error: "Missing unitId" })
-  } else {
-    await prisma.unitTypeCustom.delete({ where: { id: unitId } })
-    return reply.status(201).send()
   }
+
+  await prisma.unitTypeCustom.delete({ where: { id: unitId } })
+  return reply.status(201).send()
 }
