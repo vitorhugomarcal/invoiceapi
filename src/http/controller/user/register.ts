@@ -21,6 +21,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         data: {
           name,
           email,
+          role: "MASTER",
         },
       })
     }
