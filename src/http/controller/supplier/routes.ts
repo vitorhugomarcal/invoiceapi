@@ -2,18 +2,21 @@ import { FastifyInstance } from "fastify"
 
 import { update } from "./update"
 import { register } from "./register"
-import { getSupplierByUser } from "./getSupplierByUser"
+import { getSupplierByCompany } from "./getSupplierByCompany"
 import { getSupplierByCNPJ } from "./getSupplierByCNPJ"
 import { getSupplier } from "./getSupplier"
 import { remove } from "./remove"
-import { registerUser } from "./registerUser"
+import { registerCompany } from "./registerCompany"
 
 export async function supplierRoutes(app: FastifyInstance) {
-  app.put("/supplier/:id", update)
-  app.post("/supplier/:userId", register)
-  app.post("/supplier/addUser/:supplierId", registerUser)
-  app.get("/supplier/:id/:userId", getSupplier)
-  app.delete("/supplier/:supplierId/:userId", remove)
+  app.post("/supplier/:companyId", register)
+  app.post("/supplier/addUser/:supplierId", registerCompany)
+
+  app.get("/supplier/:id/:companyId", getSupplier)
   app.get("/supplier/cnpj/:cnpj", getSupplierByCNPJ)
-  app.get("/supplier/user/:userId", getSupplierByUser)
+  app.get("/supplier/company/:companyId", getSupplierByCompany)
+
+  app.put("/supplier/:id", update)
+
+  app.delete("/supplier/:supplierId/:companyId", remove)
 }

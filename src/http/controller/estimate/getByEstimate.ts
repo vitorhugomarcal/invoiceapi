@@ -14,16 +14,15 @@ export async function getByEstimate(
 
   if (!estimateId) {
     return reply.status(400).send({ error: "Missing estimateId" })
-  } else {
+  } 
     const invoice = await prisma.estimate.findUnique({
       where: {
         id: estimateId,
       },
       include: {
-        EstimateItems: true,
+        estimateItems: true,
         supplier: true,
       },
     })
     return invoice
-  }
 }

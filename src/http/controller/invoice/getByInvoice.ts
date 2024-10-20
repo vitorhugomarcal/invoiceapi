@@ -20,7 +20,7 @@ export async function getByInvoice(
         id: invoiceId,
       },
       include: {
-        InvoiceItems: true,
+        invoiceItems: true,
         client: true,
       },
     })

@@ -22,14 +22,14 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
 
   if (!invoiceId) {
     return reply.status(400).send({ error: "Missing userId" })
-  } else {
+  }
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
     })
     if (!invoice) {
       return reply.status(404).send({ error: "User not found" })
-    } else {
-      const invoice = await prisma.invoice.update({
+    } 
+      const invoiceUpdated = await prisma.invoice.update({
         where: { id: invoiceId },
         data: {
           invoice_number,
@@ -39,9 +39,5 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
           total,
         },
       })
-      return invoice
-    }
-  }
-
-  // return reply.status(204).send()
+      return reply.status(204).send(invoiceUpdated)
 }

@@ -1,14 +1,18 @@
 import { FastifyInstance } from "fastify"
-import { register } from "./register"
-import { getByInvoice } from "./getByInvoice"
-import { deleteItem } from "./deleteItem"
-import { getByUser } from "./getByUser"
+
 import { update } from "./update"
+import { register } from "./register"
+import { deleteItem } from "./deleteItem"
+import { getByInvoice } from "./getByInvoice"
+import { getByCompany } from "./getByCompany"
 
 export async function ItensRoutes(app: FastifyInstance) {
-  app.post("/items/:userId", register)
-  app.get("/items/:userId", getByInvoice)
-  app.get("/items/user/:userId", getByUser)
-  app.delete("/items/:itemId", deleteItem)
+  app.post("/items/:companyId", register)
+
+  app.get("/items/:invoiceId", getByInvoice)
+  app.get("/items/company/:companyId", getByCompany)
+
   app.put("/items/:itemId", update)
+
+  app.delete("/items/:itemId", deleteItem)
 }

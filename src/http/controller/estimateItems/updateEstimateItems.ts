@@ -21,13 +21,15 @@ export async function updateEstimateItems(
 
   if (!itemEstimateId) {
     return reply.status(400).send({ error: "Missing userId" })
-  } else {
-    const user = await prisma.estimateItems.findUnique({
+  } 
+    const items = await prisma.estimateItems.findUnique({
       where: { id: itemEstimateId },
     })
-    if (!user) {
-      return reply.status(404).send({ error: "User not found" })
-    } else {
+
+    if (!items) {
+      return reply.status(404).send({ error: "Items not found" })
+    } 
+
       await prisma.estimateItems.update({
         where: { id: itemEstimateId },
         data: {
@@ -35,8 +37,6 @@ export async function updateEstimateItems(
           quantity,
         },
       })
-    }
-  }
 
   return reply.status(204).send()
 }

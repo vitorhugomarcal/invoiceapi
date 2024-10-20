@@ -26,7 +26,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   }
   const invoice = await prisma.invoice.create({
     data: {
-      user_id: client.user_id,
+      company_id: client.company_id,
       client_id: client.id,
       invoice_number,
       status,

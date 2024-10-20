@@ -1,11 +1,11 @@
-import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error'
-import { makeAuthenticateUseCase } from '@/use-cases/factories/make-authenticate-use-case'
-import { FastifyRequest, FastifyReply } from 'fastify'
-import { z } from 'zod'
+import { InvalidCredentialsError } from "@/use-cases/errors/invalid-credentials-error"
+import { makeAuthenticateUseCase } from "@/use-cases/factories/make-authenticate-use-case"
+import { FastifyRequest, FastifyReply } from "fastify"
+import { z } from "zod"
 
 export async function authenticate(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const authenticateBodySchema = z.object({
     email: z.string().email(),
@@ -28,7 +28,7 @@ export async function authenticate(
         sign: {
           sub: user.id,
         },
-      },
+      }
     )
 
     const refreshToken = await reply.jwtSign(
@@ -38,14 +38,14 @@ export async function authenticate(
       {
         sign: {
           sub: user.id,
-          expiresIn: '30d',
+          expiresIn: "30d",
         },
-      },
+      }
     )
 
     return reply
-      .setCookie('refreshToken', refreshToken, {
-        path: '/',
+      .setCookie("refreshToken", refreshToken, {
+        path: "/",
         secure: true,
         sameSite: true,
         httpOnly: true,

@@ -3,23 +3,23 @@ import { FastifyRequest, FastifyReply } from "fastify"
 import { z } from "zod"
 import dayjs from "dayjs"
 
-export async function getInvoiceByUserApproved(
+export async function getInvoiceByCompanyApproved(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const invoiceParamsSchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { userId } = invoiceParamsSchema.parse(request.params)
+  const { companyId } = invoiceParamsSchema.parse(request.params)
 
-  if (!userId) {
-    return reply.status(400).send({ error: "Missing userId" })
+  if (!companyId) {
+    return reply.status(400).send({ error: "Missing companyId" })
   }
 
   const invoices = await prisma.invoice.findMany({
     where: {
-      user_id: userId,
+      company_id: companyId,
       status: "APPROVED",
     },
   })
@@ -42,7 +42,7 @@ export async function getInvoiceByUserApproved(
 
   // Aggregate totals by month
   const aggregatedInvoices = invoices.reduce((acc, invoice) => {
-    const date = dayjs(invoice.created_at)
+    const date = dayjs(invoice.createdAt)
     const month = date.format("MMM").toLowerCase() // e.g., "aug" for August
     const year = date.year()
 
