@@ -21,14 +21,16 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
 
   if (!estimateId) {
     return reply.status(400).send({ error: "Missing userId" })
-  } else {
-    const estimate = await prisma.estimate.findUnique({
-      where: { id: estimateId },
-    })
-    if (!estimate) {
-      return reply.status(404).send({ error: "User not found" })
-    } else {
-      const estimate = await prisma.estimate.update({
+  } 
+
+  const estimate = await prisma.estimate.findUnique({
+    where: { id: estimateId },
+  })
+  
+  if (!estimate) {
+    return reply.status(404).send({ error: "User not found" })
+  } 
+  const estimateUpdated = await prisma.estimate.update({
         where: { id: estimateId },
         data: {
           estimate_number,
@@ -36,9 +38,6 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
           notes,
         },
       })
-      return estimate
-    }
-  }
-
-  // return reply.status(204).send()
+      
+  return reply.status(204).send(estimateUpdated)
 }

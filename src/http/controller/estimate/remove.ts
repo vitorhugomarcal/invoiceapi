@@ -11,8 +11,8 @@ export async function remove(request: FastifyRequest, reply: FastifyReply) {
 
   if (!estimateId) {
     return reply.status(400).send({ error: "Missing estimateId" })
-  } else {
+  }
+  
     await prisma.estimate.delete({ where: { id: estimateId } })
     return reply.status(201).send()
-  }
 }
