@@ -37,14 +37,11 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   if (existingCompany) {
     return reply.status(409).send({ error: "Company already exists" })
-  } else {
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (!user) {
-      return reply.status(404).send({ error: "User not found" })
-    }
+  } 
+  
     const company = await prisma.company.create({
       data: {
-        owner_id: user.id,
+        owner_id: userId,
         company_name,
         cnpj,
         phone,
@@ -65,7 +62,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         },
       })
     }
-  }
 
   return reply.status(201).send()
 }

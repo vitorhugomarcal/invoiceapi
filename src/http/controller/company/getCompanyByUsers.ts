@@ -21,6 +21,23 @@ export async function getCompanyByUsers(
           },
         },
       },
+      include: {
+        invoice: {
+          include: {
+            client: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          }
+        },
+        client: true,
+        supplierUser: true,
+        item: true,
+        paymentModeCustom: true,
+        unitTypeCustom: true,
+        estimate: true,
+        pendingUsers: true,
+      }
     })
     if (!company) {
       return reply.status(404).send({ error: "Company not found" })

@@ -7,22 +7,25 @@ export async function getUserById(
   reply: FastifyReply
 ) {
   const userParamsSchema = z.object({
-    userId: z.string(),
+    userId: z.string().uuid("Formato de ID inválido."),
   })
 
-  const { userId } = userParamsSchema.parse(request.params)
+  try {
+    const { userId } = userParamsSchema.parse(request.params)
 
-  if (!userId) {
-    return reply.status(400).send({ error: "Missing userId" })
-  } else {
     const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
     })
+
     if (!user) {
-      return reply.status(404).send({ error: "User not found" })
+      return reply.status(404).send({ error: "Usuário não encontrado." })
     }
-    return user
+
+    return reply.status(200).send(user)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send({ error: error.errors })
+    }
+    return reply.status(500).send({ error: "Erro interno do servidor." })
   }
 }

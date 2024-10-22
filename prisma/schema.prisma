@@ -25,8 +25,8 @@ model User {
 }
 
 model Company {
-  id             String  @id @default(uuid())
-  cnpj           String  @unique
+  id             String @id @default(uuid())
+  cnpj           String @unique
   phone          String
   state          String
   city           String
@@ -35,7 +35,7 @@ model Company {
   neighborhood   String
   address_number String
   company_name   String
-  owner_id       String?
+  owner_id       String
 
   user              User[]
   item              Item[]

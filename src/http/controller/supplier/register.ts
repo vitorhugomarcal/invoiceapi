@@ -10,7 +10,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     cep: z.string(),
     address: z.string(),
     address_number: z.string(),
-    email_address: z.string().email(),
+    email_address: z.string().email().optional(),
     neighborhood: z.string(),
     city: z.string(),
     state: z.string(),
