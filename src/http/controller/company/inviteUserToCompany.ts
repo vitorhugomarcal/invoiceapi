@@ -8,21 +8,16 @@ export async function inviteUserToCompany(
 ) {
   const inviteUserSchema = z.object({
     email: z.string().email(),
-    company_id: z.string(),
-    invited_by: z.string(),
   })
 
-  const { email, company_id, invited_by } = inviteUserSchema.parse(request.body)
+  const { email } = inviteUserSchema.parse(request.body)
 
   const companyParamsSchema = z.object({
     userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { userId } = companyParamsSchema.parse(request.params)
-
-  if (!userId) {
-    return reply.status(400).send({ error: "Missing userId" })
-  }
+  const { userId, companyId } = companyParamsSchema.parse(request.params)
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
 
@@ -30,8 +25,14 @@ export async function inviteUserToCompany(
     return reply.status(404).send({ error: "User not found" })
   }
 
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+
+  if(!company) {
+    return reply.status(404).send({ error: "Company not found" })
+  }
+
   const existingInvite = await prisma.pendingUser.findUnique({
-    where: { email, company_id },
+    where: { email, company_id: companyId },
   })
   if (existingInvite) {
     throw new Error("Usuário já foi convidado.")
@@ -40,8 +41,8 @@ export async function inviteUserToCompany(
   const invitedUser = await prisma.pendingUser.create({
     data: {
       email,
-      company_id,
-      invited_by,
+      company_id: companyId,
+      invited_by: userId,
     },
   })
 

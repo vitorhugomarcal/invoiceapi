@@ -35,8 +35,9 @@ export async function getCompanyByCNPJ(
         unitTypeCustom: true,
         estimate: true,
         pendingUsers: true,
+        user: true,
       }
     })
-    return company
+    return reply.status(200).send(company)
   }
 }

@@ -37,6 +37,7 @@ export async function getCompanyByUsers(
         unitTypeCustom: true,
         estimate: true,
         pendingUsers: true,
+        user: true,
       }
     })
     if (!company) {

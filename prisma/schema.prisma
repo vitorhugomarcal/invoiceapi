@@ -17,7 +17,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  Company Company? @relation(fields: [company_id], references: [id])
+  Company Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
 
   PendingUserInvites PendingUser[]
 
@@ -70,7 +70,7 @@ model SupplierUser {
 
   supplier Supplier @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
 
-  Company Company? @relation(fields: [company_id], references: [id])
+  Company Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
 
   @@id([supplier_id, company_id])
 }
@@ -179,7 +179,7 @@ model Invoice {
   company    Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
   company_id String?  @map("company_id")
 
-  client    Client? @relation(fields: [client_id], references: [id])
+  client    Client? @relation(fields: [client_id], references: [id], onDelete: Cascade)
   client_id String? @map("client_id")
 
   @@map("invoices")
