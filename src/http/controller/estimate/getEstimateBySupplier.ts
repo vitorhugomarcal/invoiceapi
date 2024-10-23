@@ -7,24 +7,23 @@ export async function getEstimateBySupplier(
   reply: FastifyReply
 ) {
   const invoiceParamsSchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
     supplierId: z.string(),
   })
 
-  const { userId, supplierId } = invoiceParamsSchema.parse(request.params)
+  const { companyId, supplierId } = invoiceParamsSchema.parse(request.params)
 
   if (!supplierId) {
     return reply.status(400).send({ error: "Missing supplierId" })
-  } else {
+  } 
     const invoice = await prisma.estimate.findMany({
       where: {
         supplier_id: supplierId,
-        user_id: userId,
+        company_id: companyId,
       },
       orderBy: {
-        created_at: "desc",
+        createdAt: "desc",
       },
     })
     return invoice
-  }
 }

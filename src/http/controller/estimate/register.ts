@@ -14,11 +14,11 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   )
 
   const invoiceParamsSchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
     supplierId: z.string(),
   })
 
-  const { supplierId, userId } = invoiceParamsSchema.parse(request.params)
+  const { supplierId, companyId } = invoiceParamsSchema.parse(request.params)
 
   const supplier = await prisma.supplier.findUnique({
     where: { id: supplierId },
@@ -28,7 +28,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   }
   const invoice = await prisma.estimate.create({
     data: {
-      user_id: userId,
+      company_id: companyId,
       supplier_id: supplier.id,
       estimate_number,
       status,

@@ -19,7 +19,25 @@ export async function getCompanyByCNPJ(
       where: {
         cnpj,
       },
+      include: {
+        invoice: {
+          include: {
+            client: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          }
+        },
+        client: true,
+        supplierUser: true,
+        item: true,
+        paymentModeCustom: true,
+        unitTypeCustom: true,
+        estimate: true,
+        pendingUsers: true,
+        user: true,
+      }
     })
-    return company
+    return reply.status(200).send(company)
   }
 }

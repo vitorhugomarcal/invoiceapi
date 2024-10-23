@@ -10,18 +10,34 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   const { name, email } = registerBodySchema.parse(request.body)
 
-  const existingUser = await prisma.user.findFirst({ where: { email } })
+  const invite = await prisma.pendingUser.findUnique({ where: { email } })
 
-  if (existingUser) {
-    return
+  if (!invite) {
+    const existingUser = await prisma.user.findFirst({ where: { email } })
+    if (!existingUser) {
+      const user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          role: "MASTER",
+        },
+      })
+      return reply.status(201).send(user)
+    } else {
+      return reply.status(400).send({ error: "Usuário já está cadastrado." })
+    }
   } else {
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         name,
         email,
+        role: "BASIC",
+        company_id: invite.company_id,
       },
     })
-  }
 
-  return reply.status(201).send()
+    await prisma.pendingUser.delete({ where: { email } })
+
+    return reply.status(201).send(newUser)
+  }
 }

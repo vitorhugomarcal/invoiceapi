@@ -1,7 +1,7 @@
 import { env } from "./env"
 import "@/utils/dayjsLocaleConfig"
 
-import fastify from "fastify"
+import fastify, { type FastifyReply, type FastifyRequest } from "fastify"
 import cors from "@fastify/cors"
 import { fastifyJwt } from "@fastify/jwt"
 

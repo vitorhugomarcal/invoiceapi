@@ -8,26 +8,26 @@ export async function getSupplier(
 ) {
   const supplierParamsSchema = z.object({
     id: z.string(),
-    userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { id, userId } = supplierParamsSchema.parse(request.params)
+  const { id, companyId } = supplierParamsSchema.parse(request.params)
 
   if (!id) {
     return reply.status(400).send({ error: "Missing email" })
-  } else {
-    const supplier = await prisma.supplier.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        Estimate: {
-          where: {
-            user_id: userId,
-          },
+  }
+
+  const supplier = await prisma.supplier.findFirst({
+    where: {
+      id,
+    },
+    include: {
+      estimate: {
+        where: {
+          company_id: companyId,
         },
       },
-    })
-    return supplier
-  }
+    },
+  })
+  return supplier
 }
