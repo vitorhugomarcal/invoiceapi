@@ -7,13 +7,14 @@ import { verifyJWT } from "@/http/middlewares/verify-jwt"
 import { authenticate } from "./authenticate"
 import { refresh } from "./refresh"
 import { remove } from "./remove"
+import { profile } from "./profile"
 
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
   app.post("/sessions", authenticate)
   app.patch("/token/refresh", refresh)
   
-  // app.get('/me', { onRequest: [verifyJWT] }, profile)
+  app.get('/me', { onRequest: [verifyJWT] }, profile)
   app.get("/users/:userId", { onRequest: [verifyJWT] }, getUserById)
   app.put("/users/:userId", { onRequest: [verifyJWT] }, update)
   app.patch("/users/role/:userId", { onRequest: [verifyJWT] }, updateRole)
