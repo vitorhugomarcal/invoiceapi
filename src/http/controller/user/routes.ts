@@ -11,13 +11,13 @@ import { remove } from "./remove"
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
   app.post("/sessions", authenticate)
-  app.get("/users/:userId", getUserById)
   app.patch("/token/refresh", refresh)
-
+  
   // app.get('/me', { onRequest: [verifyJWT] }, profile)
-  app.put("/users/:userId", update)
-  app.delete("/users/:userId", remove)
-  app.patch("/users/role/:userId", updateRole)
+  app.get("/users/:userId", { onRequest: [verifyJWT] }, getUserById)
+  app.put("/users/:userId", { onRequest: [verifyJWT] }, update)
+  app.patch("/users/role/:userId", { onRequest: [verifyJWT] }, updateRole)
+  app.delete("/users/:userId", { onRequest: [verifyJWT] }, remove)
   // app.delete('/users/:userId', { onRequest: [verifyJWT] }, remove)
   // app.get('/users/:userId', { onRequest: [verifyJWT] }, show)
 }

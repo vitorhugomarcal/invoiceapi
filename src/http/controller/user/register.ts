@@ -14,16 +14,17 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   if (!invite) {
     const existingUser = await prisma.user.findFirst({ where: { email } })
-    if (existingUser) {
-      return
-    } else {
-      await prisma.user.create({
+    if (!existingUser) {
+      const user = await prisma.user.create({
         data: {
           name,
           email,
           role: "MASTER",
         },
       })
+      return reply.status(201).send(user)
+    } else {
+      return reply.status(400).send({ error: "Usuário já está cadastrado." })
     }
   } else {
     const newUser = await prisma.user.create({
@@ -37,8 +38,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
     await prisma.pendingUser.delete({ where: { email } })
 
-    console.log("Usuário registrado e vinculado à companhia.")
-    return newUser
+    return reply.status(201).send(newUser)
   }
-  return reply.status(201).send()
 }
