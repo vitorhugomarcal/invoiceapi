@@ -1,19 +1,18 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 
 export async function refresh(request: FastifyRequest, reply: FastifyReply) {
-  try {
     await request.jwtVerify({ onlyCookie: true })
 
     const { role, sub } = request.user
 
     const token = await reply.jwtSign(
       { role },
-      { sign: { sub, expiresIn: '20s' } }
+      { sign: { sub, expiresIn: '15m' } }
     )
 
     const refreshToken = await reply.jwtSign(
       { role },
-      { sign: { sub, expiresIn: '20s' } }
+      { sign: { sub, expiresIn: '30d' } }
     )
 
     reply.setCookie('refreshToken', refreshToken, {
@@ -24,7 +23,5 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
     })
 
     return reply.status(200).send({ token })
-  } catch (error) {
-    return reply.status(401).send({ error: 'Token inválido ou expirado.' })
-  }
+  
 }

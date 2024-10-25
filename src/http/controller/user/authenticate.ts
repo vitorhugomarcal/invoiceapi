@@ -12,10 +12,10 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
 
   try {
     // Verifica se o usuário existe no banco de dados
-    let user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return reply.status(401).send({ error: "User not found" });
+      return null;
     }
 
     // Gera o token JWT
@@ -42,7 +42,6 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
     return reply.status(200).send({
       user,
       token,
-      refreshToken,
     });
   } catch (err) {
     console.error("Erro na autenticação:", err);

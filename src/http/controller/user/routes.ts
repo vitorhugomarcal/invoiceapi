@@ -12,7 +12,7 @@ import { profile } from "./profile"
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
   app.post("/sessions", authenticate)
-  app.patch("/token/refresh", refresh)
+  app.post("/token/refresh", refresh) 
   
   app.get('/me', { onRequest: [verifyJWT] }, profile)
   app.get("/users/:userId", { onRequest: [verifyJWT] }, getUserById)
