@@ -9,9 +9,12 @@ import { getInvoiceByCompanyApproved } from "./getInvoiceByCompanyApproved"
 
 export async function invoiceRoutes(app: FastifyInstance) {
   app.post("/invoice/:clientId", register)
+ 
   app.put("/invoice/:invoiceId", update)
-  app.delete("/invoice/:invoiceId", remove)
+  
   app.get("/invoice/:invoiceId", getByInvoice)
   app.get("/invoices/user/:companyId", getInvoiceByCompany)
   app.get("/invoices/user/approved/:companyId", getInvoiceByCompanyApproved)
+ 
+  app.delete("/invoice/:invoiceId", remove)
 }

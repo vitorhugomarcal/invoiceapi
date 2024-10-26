@@ -14,11 +14,11 @@ export async function userRoutes(app: FastifyInstance) {
   app.post("/sessions", authenticate)
   app.post("/token/refresh", refresh) 
   
-  app.get('/me', { onRequest: [verifyJWT] }, profile)
-  app.get("/users/:userId", { onRequest: [verifyJWT] }, getUserById)
-  app.put("/users/:userId", { onRequest: [verifyJWT] }, update)
-  app.patch("/users/role/:userId", { onRequest: [verifyJWT] }, updateRole)
-  app.delete("/users/:userId", { onRequest: [verifyJWT] }, remove)
+  app.get('/me', profile)
+  app.get("/users/:userId", getUserById)
+  app.put("/users/:userId", update)
+  app.patch("/users/role/:userId", updateRole)
+  app.delete("/users/:userId", remove)
   // app.delete('/users/:userId', { onRequest: [verifyJWT] }, remove)
   // app.get('/users/:userId', { onRequest: [verifyJWT] }, show)
 }

@@ -52,7 +52,7 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
         .send({ error: "Unauthorized to update this company" })
     }
 
-    await prisma.company.updateMany({
+    const companyUpdated = await prisma.company.updateMany({
       where: { owner_id: userId },
       data: {
         company_name,
@@ -66,7 +66,6 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
         neighborhood,
       },
     })
+    return reply.status(204).send(companyUpdated)
   }
-
-  return reply.status(204).send()
 }

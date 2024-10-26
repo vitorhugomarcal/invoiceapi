@@ -29,7 +29,11 @@ export async function getCompanyByCNPJ(
           }
         },
         client: true,
-        supplierUser: true,
+        supplierUser: {
+          include: {
+            supplier: true,
+          }
+        },
         item: true,
         paymentModeCustom: true,
         unitTypeCustom: true,
