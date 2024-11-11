@@ -8,6 +8,7 @@ import { authenticate } from "./authenticate"
 import { refresh } from "./refresh"
 import { remove } from "./remove"
 import { profile } from "./profile"
+import { updateType } from "./updateType"
 
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
@@ -18,6 +19,7 @@ export async function userRoutes(app: FastifyInstance) {
   app.get("/users/:userId", getUserById)
   app.put("/users/:userId", update)
   app.patch("/users/role/:userId", updateRole)
+  app.patch("/users/type/:userId", updateType)
   app.delete("/users/:userId", remove)
   // app.delete('/users/:userId', { onRequest: [verifyJWT] }, remove)
   // app.get('/users/:userId', { onRequest: [verifyJWT] }, show)

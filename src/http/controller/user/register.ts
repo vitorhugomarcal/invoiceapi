@@ -20,6 +20,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
           name,
           email,
           role: "MASTER",
+          type: 'basic',
         },
       })
       return reply.status(201).send(user)
@@ -32,6 +33,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         name,
         email,
         role: "BASIC",
+        type: 'basic',
         company_id: invite.company_id,
       },
     })

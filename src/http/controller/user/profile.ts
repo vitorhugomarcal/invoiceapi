@@ -9,7 +9,7 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
     // Busca o usuário no banco de dados
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, role: true, company_id:true, createdAt: true },
+      select: { id: true, email: true, role: true, type: true, company_id:true, createdAt: true },
     });
 
     if (!user) {
