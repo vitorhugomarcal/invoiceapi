@@ -12,6 +12,7 @@ model User {
   name       String?
   email      String  @unique
   role       Role    @default(BASIC)
+  type       Type    @default(basic)
   company_id String?
 
   createdAt DateTime @default(now())
@@ -233,4 +234,10 @@ model EstimateItems {
 enum Role {
   BASIC
   MASTER
+}
+
+enum Type {
+  basic
+  pro
+  team
 }
