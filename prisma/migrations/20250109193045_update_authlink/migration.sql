@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "auth_links" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

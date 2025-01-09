@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import { z } from "zod"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import { prisma } from "@/lib/prisma"
+import { createId } from "@paralleldrive/cuid2"
 
 const resend = new Resend(process.env.RESEND_API)
 // Configurações do JWT
@@ -28,19 +29,27 @@ export async function createMagicAuth(
     })
 
     if (!user) {
-      user = await prisma.user.create({
-        data: { email },
-      })
+      throw new Error(`UnauthorizedError`)
     }
 
-    // Criar token JWT
-    const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, {
-      expiresIn: MAGIC_LINK_EXPIRATION,
+    const authLinkCode = createId()
+
+    await prisma.authLinks.create({
+      data: {
+        userId: user.id,
+        code: authLinkCode,
+      },
     })
 
-    // URL do frontend onde o usuário será redirecionado
-    // const magicLink = `${process.env.FRONTEND_URL}/auth/verify?token=${token}`
-    const magicLink = `http://192.168.1.145:5173/auth/verify?token=${token}`
+    const magicLink = new URL(
+      "/auth-links/authenticate",
+      process.env.API_BASE_URL || "http://localhost:3000"
+    )
+    magicLink.searchParams.set("code", authLinkCode)
+    magicLink.searchParams.set(
+      "redirect",
+      process.env.AUTH_REDIRECT_URL || "http://localhost:3000"
+    )
 
     // Enviar email com o magic link usando Resend
     await resend.emails.send({

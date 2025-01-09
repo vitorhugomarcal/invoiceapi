@@ -231,6 +231,15 @@ model EstimateItems {
   @@map("estimate_items")
 }
 
+model AuthLinks {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@map("auth_links")
+}
+
 enum Role {
   BASIC
   MASTER
