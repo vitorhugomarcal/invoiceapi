@@ -42,13 +42,13 @@ export async function createMagicAuth(
     })
 
     const magicLink = new URL(
-      "/auth-links/authenticate",
-      process.env.API_BASE_URL || "http://localhost:3000"
+      "/auth/magic-link",
+      process.env.API_BASE_URL || "http://192.168.1.145:5173"
     )
     magicLink.searchParams.set("code", authLinkCode)
     magicLink.searchParams.set(
       "redirect",
-      process.env.AUTH_REDIRECT_URL || "http://localhost:3000"
+      process.env.AUTH_REDIRECT_URL || "http://192.168.1.145:5173"
     )
 
     // Enviar email com o magic link usando Resend
