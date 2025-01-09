@@ -44,7 +44,7 @@ export async function createMagicAuth(
 
     // Enviar email com o magic link usando Resend
     await resend.emails.send({
-      from: "vitor@ipsec.com.br",
+      from: "no-reply@update.ipsec.com.br",
       to: email,
       subject: "Seu link de acesso",
       html: `
