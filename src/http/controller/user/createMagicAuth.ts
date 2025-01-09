@@ -1,13 +1,11 @@
 // src/routes/auth.ts
 import { Resend } from "resend"
-import { PrismaClient } from "@prisma/client"
 import jwt from "jsonwebtoken"
 import { z } from "zod"
-import { env } from "@/env"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import { prisma } from "@/lib/prisma"
 
-const resend = new Resend(env.RESEND_API)
+const resend = new Resend(process.env.RESEND_API)
 // Configurações do JWT
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 const MAGIC_LINK_EXPIRATION = "15m" // 15 minutos
