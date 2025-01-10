@@ -24,6 +24,8 @@ const ALLOWED_ORIGINS = "*"
 
 export const app = fastify()
 
+app.register(authentication)
+
 const securityConfig = {
   cors: {
     origin: ALLOWED_ORIGINS,
@@ -50,7 +52,6 @@ const securityConfig = {
 app.register(cors, securityConfig.cors)
 app.register(fastifyJwt, securityConfig.jwt)
 app.register(fastifyCookie)
-app.register(authentication)
 
 app.register(userRoutes)
 app.register(ItensRoutes)

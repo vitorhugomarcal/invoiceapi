@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import { env } from "@/env"
+import { z } from "zod"
 
 // Erros personalizados
 class UnauthorizedError extends Error {
@@ -10,20 +11,21 @@ class UnauthorizedError extends Error {
   }
 }
 
-const JWT_SECRET_KEY = env.JWT_SECRET || "your-secret-key"
-
-// Plugin de autenticação
 export async function authentication(fastify: FastifyInstance) {
   // Método para obter o usuário atual
   fastify.decorate("getCurrentUser", async (request: FastifyRequest) => {
     const token = request.cookies.auth
+    console.log("Token =>", token)
 
     if (!token) {
       throw new UnauthorizedError()
     }
 
     try {
-      const payload = jwt.verify(token, JWT_SECRET_KEY) as { sub: string }
+      const payload = jwt.verify(token, env.JWT_SECRET) as { sub: string }
+
+      console.log("PAYLOAD =>", payload)
+
       return payload
     } catch (error) {
       throw new UnauthorizedError()
@@ -32,7 +34,9 @@ export async function authentication(fastify: FastifyInstance) {
 
   // Método para assinar o JWT e definir cookie
   fastify.decorateReply("signUser", async function (payload: { sub: string }) {
-    const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "7d" })
+    const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" })
+
+    console.log("Token2 =>", token)
 
     this.setCookie("auth", token, {
       httpOnly: true,
