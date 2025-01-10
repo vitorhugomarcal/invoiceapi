@@ -63,6 +63,7 @@ export async function getMagicAuth(
         "O método `signUser` não foi registrado corretamente no FastifyReply."
       )
     }
+
     await reply.signUser({ sub: authLink.userId })
 
     // Redirecionar ou retornar resposta

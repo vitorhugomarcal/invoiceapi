@@ -31,18 +31,16 @@ export async function authentication(app: FastifyInstance) {
   })
 
   // Função para assinar JWT e definir cookie
-  app.decorate(
-    "signUser",
-    async function (reply: FastifyReply, payload: { sub: string }) {
-      const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "7d" })
+  app.decorateReply("signUser", async function (payload: { sub: string }) {
+    console.log("Registrando signUser no FastifyReply")
+    const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" })
 
-      reply.setCookie("auth", token, {
-        httpOnly: true,
-        maxAge: 7 * 86400, // 7 dias
-        path: "/",
-      })
-    }
-  )
+    this.setCookie("auth", token, {
+      httpOnly: true,
+      maxAge: 7 * 86400, // 7 dias
+      path: "/",
+    })
+  })
 
   // Função para remover o cookie de autenticação
   app.decorate("signOut", function (reply: FastifyReply) {
