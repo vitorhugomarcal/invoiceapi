@@ -25,11 +25,7 @@ import { authentication } from "./http/middlewares/authentication"
 
 const ALLOWED_ORIGINS = "*"
 
-export const app = fastify({
-  logger: {
-    level: process.env.NODE_ENV === "production" ? "info" : "debug",
-  },
-})
+export const app = fastify()
 
 const securityConfig = {
   cors: {
@@ -108,28 +104,3 @@ app.setErrorHandler((error, request, reply) => {
 
   return reply.status(statusCode).send({ message })
 })
-
-// Initialize application
-async function initializeApp() {
-  try {
-    await registerPlugins()
-    await registerRoutes()
-
-    // Add graceful shutdown handling
-    const signals = ["SIGTERM", "SIGINT"]
-    signals.forEach((signal) => {
-      process.on(signal, async () => {
-        console.log(`Received ${signal}, starting graceful shutdown...`)
-        await app.close()
-        process.exit(0)
-      })
-    })
-  } catch (error) {
-    console.error("Failed to initialize application:", error)
-    process.exit(1)
-  }
-}
-
-initializeApp()
-
-export default app
