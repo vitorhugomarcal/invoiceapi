@@ -30,7 +30,7 @@ export async function authentication(fastify: FastifyInstance) {
     }
   })
 
-  // Método para assinar o JWT e definir cookie (registrado no FastifyReply)
+  // Método para assinar o JWT e definir cookie
   fastify.decorateReply("signUser", async function (payload: { sub: string }) {
     const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "7d" })
 
