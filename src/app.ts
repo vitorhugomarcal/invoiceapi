@@ -20,7 +20,32 @@ import { AppError } from "./utils/AppError"
 import { authentication } from "./http/middlewares/authentication"
 import { env } from "./env"
 
+const ALLOWED_ORIGINS = "*"
+
 export const app = fastify()
+
+const securityConfig = {
+  cors: {
+    origin: ALLOWED_ORIGINS,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    maxAge: 86400, // 24 hours
+  },
+  jwt: {
+    secret: env.JWT_SECRET,
+    cookie: {
+      cookieName: "refreshToken",
+      signed: false,
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict" as const,
+    },
+    sign: {
+      expiresIn: "10m",
+    },
+  },
+}
 
 app.register(cors, {
   origin: "*", // specify allowed origins
@@ -29,17 +54,8 @@ app.register(cors, {
   credentials: true, // include credentials such as cookies in requests
 })
 
-app.register(fastifyJwt, {
-  secret: env.JWT_SECRET,
-  cookie: {
-    cookieName: "refreshToken",
-    signed: true,
-  },
-  sign: {
-    expiresIn: "10m",
-  },
-})
-
+app.register(cors, securityConfig.cors)
+app.register(fastifyJwt, securityConfig.jwt)
 app.register(fastifyCookie)
 app.register(authentication)
 
