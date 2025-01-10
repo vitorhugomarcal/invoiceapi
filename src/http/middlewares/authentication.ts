@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
-import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { env } from "@/env"
+import { app } from "@/app"
 
 // Erros personalizados
 class UnauthorizedError extends Error {
@@ -20,18 +21,21 @@ class NotAManagerError extends Error {
 const JWT_SECRET_KEY = env.JWT_SECRET
 
 // Plugin de autenticação
-export async function authentication(fastify: FastifyInstance) {
-  fastify.decorate("getCurrentUser", async (request: FastifyRequest) => {
+export async function authentication() {
+  app.decorate("getCurrentUser", async (request: FastifyRequest) => {
     const token = request.cookies.auth
+
+    console.log("TOKEN =>", token)
 
     if (!token) {
       throw new UnauthorizedError()
     }
 
     try {
-      const payload = jwt.verify(token, JWT_SECRET_KEY) as {
-        sub: string
-      }
+      const payload = jwt.verify(token, JWT_SECRET_KEY) as { sub: string }
+
+      console.log("PAYLOAD =>", payload)
+
       return payload
     } catch (error) {
       throw new UnauthorizedError()
@@ -39,28 +43,25 @@ export async function authentication(fastify: FastifyInstance) {
   })
 
   // Função para assinar JWT e definir cookie
-  fastify.decorate(
+  app.decorate(
     "signUser",
     async (reply: FastifyReply, payload: { sub: string }) => {
-      const token = jwt.sign(payload, JWT_SECRET_KEY, {
-        expiresIn: "7d", // 7 dias
-      })
-
+      const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "7d" })
       reply.setCookie("auth", token, {
         httpOnly: true,
-        maxAge: 7 * 86400, // 7 dias em segundos
+        maxAge: 7 * 86400, // 7 dias
         path: "/",
       })
     }
   )
 
   // Função para remover o cookie de autenticação
-  fastify.decorate("signOut", (reply: FastifyReply) => {
+  app.decorate("signOut", (reply: FastifyReply) => {
     reply.clearCookie("auth", { path: "/" })
   })
 
   // Tratamento de erros personalizados
-  fastify.setErrorHandler((error, request, reply) => {
+  app.setErrorHandler((error, request, reply) => {
     if (error instanceof UnauthorizedError) {
       reply.status(401).send({ code: "UNAUTHORIZED", message: error.message })
     } else if (error instanceof NotAManagerError) {
