@@ -17,6 +17,7 @@ import { UnitsRoutes } from "./http/controller/Units/routes"
 import { supplierRoutes } from "./http/controller/supplier/routes"
 import { estimateItemsRoutes } from "./http/controller/estimateItems/routes"
 import { estimateRoutes } from "./http/controller/estimate/routes"
+import { authentication } from "./http/middlewares/authentication"
 
 export const app = fastify()
 
@@ -39,6 +40,7 @@ app.register(fastifyJwt, {
 })
 
 app.register(fastifyCookie)
+app.register(authentication)
 
 app.register(userRoutes)
 app.register(ItensRoutes)

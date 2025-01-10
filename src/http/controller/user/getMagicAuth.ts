@@ -1,9 +1,6 @@
-import jwt from "jsonwebtoken"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import { prisma } from "@/lib/prisma"
 import dayjs from "dayjs"
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
 export async function getMagicAuth(
   request: FastifyRequest,
@@ -42,29 +39,23 @@ export async function getMagicAuth(
       })
     }
 
-    // Gerar token JWT de autenticação
-    const authToken = jwt.sign(
-      {
-        sub: authLink.userId,
-      },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    )
-
     // Remover o código de autenticação do banco
     await prisma.authLinks.delete({
       where: { code },
     })
 
-    // Redirecionar ou enviar token
+    // Assinar o usuário usando o método do plugin
+    const token = await request.signUser({
+      sub: authLink.userId,
+    })
+
+    // Redirecionar ou enviar confirmação
     if (redirect) {
-      reply.redirect(`${redirect}?token=${authToken}`)
+      reply.redirect(`${redirect}`)
     } else {
       reply.status(200).send({
-        token: authToken,
-        user: {
-          id: authLink.userId,
-        },
+        message: "Autenticação realizada com sucesso",
+        token,
       })
     }
   } catch (error) {
