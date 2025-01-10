@@ -32,7 +32,7 @@ class AuthError extends Error {
 const env = envSchema.parse({
   RESEND_API: process.env.RESEND_API,
   JWT_SECRET: process.env.JWT_SECRET,
-  API_BASE_URL: process.env.API_BASE_URL || "http://192.168.1.145:5173",
+  API_BASE_URL: process.env.API_BASE_URL || "URL API",
   AUTH_REDIRECT_URL:
     process.env.AUTH_REDIRECT_URL || "http://192.168.1.145:5173",
 })
@@ -146,7 +146,7 @@ export async function createMagicAuth(
     await createMagicLinkEmail(email, magicLink)
 
     // Log success (implement proper logging in production)
-    console.info(`Magic link sent successfully to ${email}`)
+    console.info(`🚀 Magic link sent successfully to ${email}`)
 
     return reply.status(200).send({
       message: "Link de acesso enviado com sucesso! Verifique seu email.",

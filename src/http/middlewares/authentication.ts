@@ -11,13 +11,6 @@ class UnauthorizedError extends Error {
   }
 }
 
-class NotAManagerError extends Error {
-  constructor() {
-    super("Usuário não é um gerente")
-    this.name = "NotAManagerError"
-  }
-}
-
 const JWT_SECRET_KEY = env.JWT_SECRET
 
 // Plugin de autenticação
@@ -64,8 +57,6 @@ export async function authentication() {
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof UnauthorizedError) {
       reply.status(401).send({ code: "UNAUTHORIZED", message: error.message })
-    } else if (error instanceof NotAManagerError) {
-      reply.status(401).send({ code: "NOT_A_MANAGER", message: error.message })
     } else {
       reply
         .status(500)
@@ -79,7 +70,6 @@ declare module "fastify" {
   interface FastifyInstance {
     getCurrentUser: (request: FastifyRequest) => Promise<{
       sub: string
-      restaurantId?: string
     }>
     signUser: (reply: FastifyReply, payload: { sub: string }) => Promise<void>
     signOut: (reply: FastifyReply) => void
