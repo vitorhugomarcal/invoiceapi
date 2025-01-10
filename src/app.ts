@@ -25,7 +25,11 @@ import { authentication } from "./http/middlewares/authentication"
 
 const ALLOWED_ORIGINS = "*"
 
-export const app = fastify()
+export const app = fastify({
+  logger: {
+    level: process.env.NODE_ENV === "production" ? "info" : "debug",
+  },
+})
 
 const securityConfig = {
   cors: {
@@ -57,50 +61,27 @@ async function registerPlugins() {
   await app.register(authentication)
 }
 
-async function registerRoutes() {
-  const routes = [
-    userRoutes,
-    ItensRoutes,
-    UnitsRoutes,
-    clientRoutes,
-    invoiceRoutes,
-    companyRoutes,
-    estimateRoutes,
-    supplierRoutes,
-    invoiceItemsRoutes,
-    estimateItemsRoutes,
-  ]
+app.register(userRoutes)
+app.register(ItensRoutes)
+app.register(UnitsRoutes)
+app.register(clientRoutes)
+app.register(invoiceRoutes)
+app.register(companyRoutes)
+app.register(estimateRoutes)
+app.register(supplierRoutes)
+app.register(invoiceItemsRoutes)
+app.register(estimateItemsRoutes)
 
-  for (const route of routes) {
-    await app.register(route)
+app.setErrorHandler((error, _request, reply) => {
+  if (error instanceof AppError) {
+    return reply.status(400).send({ message: error.message })
   }
-}
 
-app.setErrorHandler((error, request, reply) => {
-  const statusCode = error instanceof AppError ? 400 : 500
-  const message =
-    error instanceof AppError ? error.message : "Internal server error."
-
-  // Log errors appropriately based on environment
   if (process.env.NODE_ENV !== "production") {
-    console.error("Error details:", {
-      message: error.message,
-      stack: error.stack,
-      path: request.url,
-      method: request.method,
-    })
+    console.error(error)
   } else {
-    // Production error logging
-    // TODO: Implement proper error logging service
-    const errorLog = {
-      timestamp: new Date().toISOString(),
-      error: error.message,
-      path: request.url,
-      method: request.method,
-      statusCode,
-    }
-    console.error(JSON.stringify(errorLog))
+    // TODO: here we should log to an external tool like DataDog/NewRelic.Sentry
   }
 
-  return reply.status(statusCode).send({ message })
+  return reply.status(500).send({ message: "Internal server error." })
 })
