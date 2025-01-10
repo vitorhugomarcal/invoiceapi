@@ -1,6 +1,7 @@
 // src/http/controllers/users/getMagicAuth.ts
 import { FastifyReply, FastifyRequest } from "fastify"
 import { PrismaClient } from "@prisma/client"
+import { verifyToken } from "@/utils/verify-token"
 
 const prisma = new PrismaClient()
 
@@ -17,11 +18,11 @@ export async function getMagicAuth(
       )
     }
 
-    // Verificar o token
-    const { sub } = await request.jwtVerify()
+    // Usar o utilitário para verificar o token
+    const decoded = verifyToken(token)
 
     const user = await prisma.user.findUnique({
-      where: { id: sub },
+      where: { id: decoded.sub },
     })
 
     if (!user) {
@@ -33,6 +34,7 @@ export async function getMagicAuth(
     // Gerar token de autenticação de 7 dias
     const authToken = await reply.jwtSign(
       {
+        role: user.role,
         type: user.type,
       },
       {
