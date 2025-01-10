@@ -3,100 +3,82 @@ import { prisma } from "@/lib/prisma"
 import dayjs from "dayjs"
 import fastify, { FastifyReply, FastifyRequest } from "fastify"
 import { app } from "@/app"
+import jwt from "jsonwebtoken"
 
 const querySchema = z.object({
   code: z.string().min(1, "Código de autenticação é obrigatório"),
   redirect: z.string().url("URL de redirecionamento inválida").optional(),
 })
 
-class AuthError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-    public readonly statusCode: number
-  ) {
-    super(message)
-    this.name = "AuthError"
-  }
-}
+const emailSchema = z.object({
+  email: z.string().email(),
+})
 
+// Configurações do JWT e Cookie
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+const MAGIC_LINK_EXPIRATION = "15m"
+const AUTH_COOKIE_NAME = "auth_token"
+
+// Configurações do cookie
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias em millisegundos
+}
 export async function getMagicAuth(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  try {
-    const { code, redirect } = querySchema.parse(request.query)
+  await app.register(import("@fastify/cookie"), {
+    secret: process.env.COOKIE_SECRET || "your-cookie-secret",
+  })
 
-    const authLink = await prisma.authLinks.findFirst({
-      where: { code },
+  try {
+    const { token } = request.query as { token?: string }
+
+    if (!token) {
+      return reply.status(400).send({
+        error: "Token não fornecido",
+      })
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string
+      email: string
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
     })
 
-    if (!authLink) {
-      throw new AuthError(
-        "Código inválido ou não encontrado",
-        "INVALID_CODE",
-        401
-      )
-    }
-
-    const isExpired = dayjs().diff(authLink.createdAt, "minutes") > 15
-
-    if (isExpired) {
-      await prisma.authLinks.delete({
-        where: { id: authLink.id },
+    if (!user) {
+      return reply.status(404).send({
+        error: "Usuário não encontrado",
       })
-
-      throw new AuthError(
-        "Link de acesso expirado. Por favor, solicite um novo link.",
-        "LINK_EXPIRED",
-        401
-      )
     }
 
-    const payload = {
-      sub: authLink.userId,
-    }
+    // Gerar token de autenticação
+    const authToken = jwt.sign(
+      { userId: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    )
 
-    // Assinar o JWT e definir o cookie
-    await reply.signUser(payload)
-
-    // Redirecionar ou retornar resposta
-    if (redirect) {
-      return reply.redirect(302, redirect)
-    }
+    // Configurar o cookie com o token
+    reply.setCookie(AUTH_COOKIE_NAME, authToken, COOKIE_OPTIONS)
 
     return reply.status(200).send({
-      code: "AUTH_SUCCESS",
-      message: "Autenticação realizada com sucesso",
+      user: {
+        id: user.id,
+        email: user.email,
+      },
     })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        code: "VALIDATION_ERROR",
-        message: "Dados inválidos",
-        details: error.errors,
-      })
-    }
-
-    if (error instanceof AuthError) {
-      return reply.status(error.statusCode).send({
-        code: error.code,
-        message: error.message,
-      })
-    }
-
-    console.error("Erro não esperado na autenticação:", error)
-
-    return reply.status(500).send({
-      code: "INTERNAL_ERROR",
-      message:
-        "Erro interno do servidor. Por favor, tente novamente mais tarde.",
+    console.error("Erro ao verificar token:", error)
+    return reply.status(400).send({
+      error: "Token inválido ou expirado",
     })
-  }
-}
-
-declare module "fastify" {
-  interface FastifyReply {
-    signUser: (payload: { sub: string }) => Promise<void>
   }
 }

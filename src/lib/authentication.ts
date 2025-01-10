@@ -15,7 +15,7 @@ class UnauthorizedError extends Error {
 interface JwtPayload {
   sub: string
 }
-export async function authentication(fastify: FastifyInstance) {
+export async function authentication(app: FastifyInstance) {
   // Método para obter o usuário atual
   app.decorate("getCurrentUser", async (request: FastifyRequest) => {
     const token = request.cookies.auth
