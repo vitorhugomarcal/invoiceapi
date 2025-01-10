@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import { env } from "@/env"
 import { z } from "zod"
+import { app } from "@/app"
 
 // Erros personalizados
 class UnauthorizedError extends Error {
@@ -16,7 +17,7 @@ interface JwtPayload {
 }
 export async function authentication(fastify: FastifyInstance) {
   // Método para obter o usuário atual
-  fastify.decorate("getCurrentUser", async (request: FastifyRequest) => {
+  app.decorate("getCurrentUser", async (request: FastifyRequest) => {
     const token = request.cookies.auth
     console.log("Token =>", token)
 
@@ -38,7 +39,7 @@ export async function authentication(fastify: FastifyInstance) {
   })
 
   // Método para assinar o JWT e definir cookie
-  fastify.decorateReply("signUser", async function (payload: { sub: string }) {
+  app.decorateReply("signUser", async function (payload: { sub: string }) {
     const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" })
 
     console.log("Token2 =>", token)
@@ -53,12 +54,12 @@ export async function authentication(fastify: FastifyInstance) {
   })
 
   // Método para limpar o cookie de autenticação
-  fastify.decorateReply("signOut", function () {
+  app.decorateReply("signOut", function () {
     this.clearCookie("auth", { path: "/" })
   })
 
   // Tratamento de erros personalizados
-  fastify.setErrorHandler((error, request, reply) => {
+  app.setErrorHandler((error, request, reply) => {
     if (error instanceof UnauthorizedError) {
       reply.status(401).send({ code: "UNAUTHORIZED", message: error.message })
     } else {
@@ -69,14 +70,14 @@ export async function authentication(fastify: FastifyInstance) {
   })
 }
 
-// Declarações de tipo para o Fastify
-declare module "fastify" {
-  interface FastifyReply {
-    signUser: (payload: { sub: string }) => Promise<void>
-    signOut: () => void
-  }
+// // Declarações de tipo para o Fastify
+// declare module "fastify" {
+//   interface FastifyReply {
+//     signUser: (payload: { sub: string }) => Promise<void>
+//     signOut: () => void
+//   }
 
-  interface FastifyInstance {
-    getCurrentUser: (request: FastifyRequest) => Promise<{ sub: string }>
-  }
-}
+//   interface FastifyInstance {
+//     getCurrentUser: (request: FastifyRequest) => Promise<{ sub: string }>
+//   }
+// }

@@ -1,7 +1,8 @@
-import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import dayjs from "dayjs"
+import fastify, { FastifyReply, FastifyRequest } from "fastify"
+import { app } from "@/app"
 
 const querySchema = z.object({
   code: z.string().min(1, "Código de autenticação é obrigatório"),
@@ -94,11 +95,7 @@ export async function getMagicAuth(
   }
 }
 
-// Extensão dos tipos do Fastify
 declare module "fastify" {
-  interface FastifyInstance {
-    signUser: (payload: { sub: string }) => Promise<void>
-  }
   interface FastifyReply {
     signUser: (payload: { sub: string }) => Promise<void>
   }
