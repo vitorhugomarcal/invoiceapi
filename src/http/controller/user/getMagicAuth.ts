@@ -58,13 +58,10 @@ export async function getMagicAuth(
     })
 
     // Gerar e salvar o token no cookie usando o plugin de autenticação
-    if (typeof reply.signUser !== "function") {
-      throw new Error(
-        "O método `signUser` não foi registrado corretamente no FastifyReply."
-      )
-    }
-
-    await reply.signUser({ sub: authLink.userId })
+    await reply.signUser({
+      sub: authLink.userId,
+      // Você pode adicionar mais dados ao payload se necessário
+    })
 
     // Redirecionar ou retornar resposta
     if (redirect) {
@@ -91,9 +88,7 @@ export async function getMagicAuth(
       })
     }
 
-    console.error("Erro inesperado na autenticação:", {
-      error,
-    })
+    console.error("Erro não esperado na autenticação:", error)
 
     return reply.status(500).send({
       code: "INTERNAL_ERROR",
@@ -105,6 +100,9 @@ export async function getMagicAuth(
 
 // Extensão dos tipos do Fastify
 declare module "fastify" {
+  interface FastifyInstance {
+    signUser: (payload: { sub: string }) => Promise<void>
+  }
   interface FastifyReply {
     signUser: (payload: { sub: string }) => Promise<void>
   }

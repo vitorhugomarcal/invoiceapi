@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import { FastifyReply, FastifyRequest, type FastifyInstance } from "fastify"
+import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import { env } from "@/env"
 
 // Erros personalizados
@@ -10,12 +10,12 @@ class UnauthorizedError extends Error {
   }
 }
 
-const JWT_SECRET_KEY = env.JWT_SECRET
+const JWT_SECRET_KEY = env.JWT_SECRET || "your-secret-key"
 
 // Plugin de autenticação
-export async function authentication(app: FastifyInstance) {
-  // Função para obter o usuário atual
-  app.decorate("getCurrentUser", async function (request: FastifyRequest) {
+export async function authentication(fastify: FastifyInstance) {
+  // Método para obter o usuário atual
+  fastify.decorate("getCurrentUser", async (request: FastifyRequest) => {
     const token = request.cookies.auth
 
     if (!token) {
@@ -30,10 +30,9 @@ export async function authentication(app: FastifyInstance) {
     }
   })
 
-  // Função para assinar JWT e definir cookie
-  app.decorateReply("signUser", async function (payload: { sub: string }) {
-    console.log("Registrando signUser no FastifyReply")
-    const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" })
+  // Método para assinar o JWT e definir cookie (registrado no FastifyReply)
+  fastify.decorateReply("signUser", async function (payload: { sub: string }) {
+    const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "7d" })
 
     this.setCookie("auth", token, {
       httpOnly: true,
@@ -42,13 +41,13 @@ export async function authentication(app: FastifyInstance) {
     })
   })
 
-  // Função para remover o cookie de autenticação
-  app.decorate("signOut", function (reply: FastifyReply) {
-    reply.clearCookie("auth", { path: "/" })
+  // Método para limpar o cookie de autenticação
+  fastify.decorateReply("signOut", function () {
+    this.clearCookie("auth", { path: "/" })
   })
 
   // Tratamento de erros personalizados
-  app.setErrorHandler((error, request, reply) => {
+  fastify.setErrorHandler((error, request, reply) => {
     if (error instanceof UnauthorizedError) {
       reply.status(401).send({ code: "UNAUTHORIZED", message: error.message })
     } else {
@@ -57,4 +56,15 @@ export async function authentication(app: FastifyInstance) {
         .send({ code: "INTERNAL_SERVER_ERROR", message: error.message })
     }
   })
+}
+
+// Declarações de tipo para o Fastify
+declare module "fastify" {
+  interface FastifyReply {
+    signUser: (payload: { sub: string }) => Promise<void>
+    signOut: () => void
+  }
+  interface FastifyInstance {
+    getCurrentUser: (request: FastifyRequest) => Promise<{ sub: string }>
+  }
 }
