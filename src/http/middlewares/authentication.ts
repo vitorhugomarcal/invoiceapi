@@ -28,7 +28,12 @@ export async function authentication(fastify: FastifyInstance) {
 
       return payload
     } catch (error) {
-      throw new UnauthorizedError()
+      // Tratando erro específico de JWT
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new UnauthorizedError()
+      }
+      // Re-lançando outros tipos de erro
+      throw error
     }
   })
 
@@ -42,6 +47,8 @@ export async function authentication(fastify: FastifyInstance) {
       httpOnly: true,
       maxAge: 7 * 86400, // 7 dias
       path: "/",
+      secure: env.NODE_ENV === "production", // Configuração para produção
+      sameSite: "strict", // Segurança adicional para cookies
     })
   })
 

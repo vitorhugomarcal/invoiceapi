@@ -53,9 +53,9 @@ export async function getMagicAuth(
     }
 
     // Remover o link usado
-    await prisma.authLinks.delete({
-      where: { id: authLink.id },
-    })
+    // await prisma.authLinks.delete({
+    //   where: { id: authLink.id },
+    // })
 
     await reply.signUser({ sub: authLink.userId })
 
