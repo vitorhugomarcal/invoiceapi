@@ -81,10 +81,7 @@ export async function getMagicAuth(
     // }).catch(console.error)
 
     // Gerar e salvar o token no cookie usando o plugin de autenticação
-    await reply.signUser({
-      sub: authLink.userId,
-      // Você pode adicionar mais dados ao payload se necessário
-    })
+    await reply.signUser({ sub: authLink.userId })
 
     // Redirecionar ou retornar resposta
     if (redirect) {
