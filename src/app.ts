@@ -47,13 +47,6 @@ const securityConfig = {
   },
 }
 
-app.register(cors, {
-  origin: "*", // specify allowed origins
-  methods: ["GET", "POST", "PUT", "DELETE"], // specify allowed methods
-  allowedHeaders: ["Content-Type", "Authorization"], // specify allowed headers
-  credentials: true, // include credentials such as cookies in requests
-})
-
 app.register(cors, securityConfig.cors)
 app.register(fastifyJwt, securityConfig.jwt)
 app.register(fastifyCookie)
