@@ -34,6 +34,7 @@ const securityConfig = {
   },
   jwt: {
     secret: env.JWT_SECRET,
+    withCredentials: true,
     cookie: {
       cookieName: "auth_token",
       signed: false,
