@@ -35,7 +35,7 @@ const securityConfig = {
   jwt: {
     secret: env.JWT_SECRET,
     cookie: {
-      cookieName: "refreshToken",
+      cookieName: "auth",
       signed: false,
       httpOnly: true,
       secure: env.NODE_ENV === "production",

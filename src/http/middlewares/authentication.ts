@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken"
-import { FastifyReply, FastifyRequest } from "fastify"
-import { app } from "@/app"
-
-const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "your-secret-key"
+import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
+import { env } from "@/env"
 
 // Erros personalizados
 class UnauthorizedError extends Error {
@@ -19,9 +17,11 @@ class NotAManagerError extends Error {
   }
 }
 
+const JWT_SECRET_KEY = env.JWT_SECRET
+
 // Plugin de autenticação
-export async function authentication() {
-  app.decorate("getCurrentUser", async (request: FastifyRequest) => {
+export async function authentication(fastify: FastifyInstance) {
+  fastify.decorate("getCurrentUser", async (request: FastifyRequest) => {
     const token = request.cookies.auth
 
     if (!token) {
@@ -31,7 +31,6 @@ export async function authentication() {
     try {
       const payload = jwt.verify(token, JWT_SECRET_KEY) as {
         sub: string
-        restaurantId?: string
       }
       return payload
     } catch (error) {
@@ -40,12 +39,9 @@ export async function authentication() {
   })
 
   // Função para assinar JWT e definir cookie
-  app.decorate(
+  fastify.decorate(
     "signUser",
-    async (
-      reply: FastifyReply,
-      payload: { sub: string; restaurantId?: string }
-    ) => {
+    async (reply: FastifyReply, payload: { sub: string }) => {
       const token = jwt.sign(payload, JWT_SECRET_KEY, {
         expiresIn: "7d", // 7 dias
       })
@@ -59,12 +55,12 @@ export async function authentication() {
   )
 
   // Função para remover o cookie de autenticação
-  app.decorate("signOut", (reply: FastifyReply) => {
+  fastify.decorate("signOut", (reply: FastifyReply) => {
     reply.clearCookie("auth", { path: "/" })
   })
 
   // Tratamento de erros personalizados
-  app.setErrorHandler((error, request, reply) => {
+  fastify.setErrorHandler((error, request, reply) => {
     if (error instanceof UnauthorizedError) {
       reply.status(401).send({ code: "UNAUTHORIZED", message: error.message })
     } else if (error instanceof NotAManagerError) {
@@ -75,4 +71,16 @@ export async function authentication() {
         .send({ code: "INTERNAL_SERVER_ERROR", message: error.message })
     }
   })
+}
+
+// Declarações de tipo para o Fastify
+declare module "fastify" {
+  interface FastifyInstance {
+    getCurrentUser: (request: FastifyRequest) => Promise<{
+      sub: string
+      restaurantId?: string
+    }>
+    signUser: (reply: FastifyReply, payload: { sub: string }) => Promise<void>
+    signOut: (reply: FastifyReply) => void
+  }
 }

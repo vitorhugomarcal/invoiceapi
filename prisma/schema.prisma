@@ -236,6 +236,7 @@ model AuthLinks {
   code      String   @unique
   userId    String
   createdAt DateTime @default(now())
+  expiresAt DateTime @default(now())
 
   @@map("auth_links")
 }

@@ -1,67 +1,132 @@
-import type { FastifyReply, FastifyRequest } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import dayjs from "dayjs"
+
+const querySchema = z.object({
+  code: z.string().min(1, "Código de autenticação é obrigatório"),
+  redirect: z.string().url("URL de redirecionamento inválida").optional(),
+})
+
+class AuthError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly statusCode: number
+  ) {
+    super(message)
+    this.name = "AuthError"
+  }
+}
 
 export async function getMagicAuth(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
-    const { code, redirect } = request.query as {
-      code: string
-      redirect: string
-    }
+    const { code, redirect } = querySchema.parse(request.query)
 
-    if (!code || typeof code !== "string") {
-      return reply.status(400).send({
-        error: "Código de autenticação não fornecido",
-      })
-    }
-
-    // Buscar o código de autenticação no banco
     const authLink = await prisma.authLinks.findFirst({
       where: { code },
+      // include: {
+      //   user: {
+      //     select: {
+      //       id: true,
+      //       email: true,
+      //       isActive: true,
+      //     }
+      //   }
+      // }
     })
 
     if (!authLink) {
-      return reply.status(401).send({
-        error: "Código inválido ou não encontrado",
-      })
+      throw new AuthError(
+        "Código inválido ou não encontrado",
+        "INVALID_CODE",
+        401
+      )
     }
 
-    // Verificar se o link expirou (validade de 7 dias)
-    if (dayjs().diff(authLink.createdAt, "days") > 7) {
+    // if (!authLink.user.isActive) {
+    //   throw new AuthError(
+    //     "Conta de usuário desativada",
+    //     "INACTIVE_USER",
+    //     403
+    //   )
+    // }
+
+    const isExpired = dayjs().diff(authLink.createdAt, "minutes") > 15
+
+    if (isExpired) {
       await prisma.authLinks.delete({
-        where: { code },
+        where: { id: authLink.id },
       })
-      return reply.status(401).send({
-        error: "Código expirado",
-      })
+
+      throw new AuthError(
+        "Link de acesso expirado. Por favor, solicite um novo link.",
+        "LINK_EXPIRED",
+        401
+      )
     }
 
-    // Remover o código de autenticação do banco
+    // Remover o link usado
     await prisma.authLinks.delete({
-      where: { code },
+      where: { id: authLink.id },
     })
 
-    // Assinar o usuário usando o método do plugin
-    const token = await request.signUser({
+    // Atualizar último login
+    // await prisma.user.update({
+    //   where: { id: authLink.userId },
+    //   data: { lastLoginAt: new Date() }
+    // }).catch(console.error)
+
+    // Gerar e salvar o token no cookie usando o plugin de autenticação
+    await reply.signUser({
       sub: authLink.userId,
+      // Você pode adicionar mais dados ao payload se necessário
     })
 
-    // Redirecionar ou enviar confirmação
+    // Redirecionar ou retornar resposta
     if (redirect) {
-      reply.redirect(`${redirect}`)
-    } else {
-      reply.status(200).send({
-        message: "Autenticação realizada com sucesso",
-        token,
+      return reply.redirect(302, redirect)
+    }
+
+    return reply.status(200).send({
+      code: "AUTH_SUCCESS",
+      message: "Autenticação realizada com sucesso",
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send({
+        code: "VALIDATION_ERROR",
+        message: "Dados inválidos",
+        details: error.errors,
       })
     }
-  } catch (error) {
-    console.error("Erro ao processar autenticação via link:", error)
-    return reply.status(400).send({
-      error: "Erro ao processar autenticação",
+
+    if (error instanceof AuthError) {
+      return reply.status(error.statusCode).send({
+        code: error.code,
+        message: error.message,
+      })
+    }
+
+    console.error("Erro não esperado na autenticação:", error)
+
+    return reply.status(500).send({
+      code: "INTERNAL_ERROR",
+      message:
+        "Erro interno do servidor. Por favor, tente novamente mais tarde.",
     })
+  }
+}
+
+// Extensão dos tipos do Fastify
+declare module "fastify" {
+  interface FastifyInstance {
+    signUser: (payload: { sub: string }) => Promise<void>
+  }
+  interface FastifyReply {
+    signUser: (payload: { sub: string }) => Promise<void>
   }
 }
