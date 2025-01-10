@@ -18,48 +18,30 @@ import { estimateItemsRoutes } from "./http/controller/estimateItems/routes"
 
 import { AppError } from "./utils/AppError"
 import { authentication } from "./http/middlewares/authentication"
+import { env } from "./env"
 
-// const ALLOWED_ORIGINS = process.env.NODE_ENV === 'production'
-//   ? ['https://yourapp.com', 'https://api.yourapp.com']
-//   : ['http://localhost:3000']
+export const app = fastify()
 
-const ALLOWED_ORIGINS = "*"
+app.register(cors, {
+  origin: "*", // specify allowed origins
+  methods: ["GET", "POST", "PUT", "DELETE"], // specify allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"], // specify allowed headers
+  credentials: true, // include credentials such as cookies in requests
+})
 
-export const app = fastify({
-  logger: {
-    level: process.env.NODE_ENV === "production" ? "info" : "debug",
+app.register(fastifyJwt, {
+  secret: env.JWT_SECRET,
+  cookie: {
+    cookieName: "refreshToken",
+    signed: true,
+  },
+  sign: {
+    expiresIn: "10m",
   },
 })
 
-const securityConfig = {
-  cors: {
-    origin: ALLOWED_ORIGINS,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-    maxAge: 86400, // 24 hours
-  },
-  jwt: {
-    secret: process.env.JWT_SECRET || "",
-    cookie: {
-      cookieName: "refreshToken",
-      signed: false,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict" as const,
-    },
-    sign: {
-      expiresIn: "10m",
-    },
-  },
-}
-
-async function registerPlugins() {
-  await app.register(cors, securityConfig.cors)
-  await app.register(fastifyJwt, securityConfig.jwt)
-  await app.register(fastifyCookie)
-  await app.register(authentication)
-}
+app.register(fastifyCookie)
+app.register(authentication)
 
 app.register(userRoutes)
 app.register(ItensRoutes)
@@ -77,7 +59,7 @@ app.setErrorHandler((error, _request, reply) => {
     return reply.status(400).send({ message: error.message })
   }
 
-  if (process.env.NODE_ENV !== "production") {
+  if (env.NODE_ENV !== "production") {
     console.error(error)
   } else {
     // TODO: here we should log to an external tool like DataDog/NewRelic.Sentry
