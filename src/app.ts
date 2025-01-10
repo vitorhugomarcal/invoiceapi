@@ -50,7 +50,9 @@ const securityConfig = {
 app.register(authentication)
 app.register(cors, securityConfig.cors)
 app.register(fastifyJwt, securityConfig.jwt)
-app.register(fastifyCookie)
+app.register(fastifyCookie, {
+  secret: env.JWT_SECRET,
+})
 
 app.register(userRoutes)
 app.register(ItensRoutes)
