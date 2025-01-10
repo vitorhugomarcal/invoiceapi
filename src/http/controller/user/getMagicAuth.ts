@@ -52,8 +52,12 @@ export async function getMagicAuth(
       )
     }
 
+    const payload = {
+      sub: authLink.userId,
+    }
+
     // Assinar o JWT e definir o cookie
-    await reply.signUser({ sub: authLink.userId })
+    await reply.signUser(payload)
 
     // Redirecionar ou retornar resposta
     if (redirect) {
