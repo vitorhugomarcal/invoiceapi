@@ -17,7 +17,7 @@ import { invoiceItemsRoutes } from "./http/controller/invoiceItems/routes"
 import { estimateItemsRoutes } from "./http/controller/estimateItems/routes"
 
 import { AppError } from "./utils/AppError"
-import { authentication } from "./http/middlewares/authentication"
+import { authentication } from "./lib/authentication"
 import { env } from "./env"
 
 const ALLOWED_ORIGINS = "*"
@@ -47,11 +47,10 @@ const securityConfig = {
   },
 }
 
+app.register(authentication)
 app.register(cors, securityConfig.cors)
 app.register(fastifyJwt, securityConfig.jwt)
-
 app.register(fastifyCookie)
-app.register(authentication)
 
 app.register(userRoutes)
 app.register(ItensRoutes)

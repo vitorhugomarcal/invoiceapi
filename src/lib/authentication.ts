@@ -11,6 +11,9 @@ class UnauthorizedError extends Error {
   }
 }
 
+interface JwtPayload {
+  sub: string
+}
 export async function authentication(fastify: FastifyInstance) {
   // Método para obter o usuário atual
   fastify.decorate("getCurrentUser", async (request: FastifyRequest) => {
@@ -22,17 +25,14 @@ export async function authentication(fastify: FastifyInstance) {
     }
 
     try {
-      const payload = jwt.verify(token, env.JWT_SECRET) as { sub: string }
-
+      const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload
       console.log("PAYLOAD =>", payload)
 
       return payload
     } catch (error) {
-      // Tratando erro específico de JWT
       if (error instanceof jwt.JsonWebTokenError) {
         throw new UnauthorizedError()
       }
-      // Re-lançando outros tipos de erro
       throw error
     }
   })
@@ -47,7 +47,7 @@ export async function authentication(fastify: FastifyInstance) {
       httpOnly: true,
       maxAge: 7 * 86400, // 7 dias
       path: "/",
-      secure: env.NODE_ENV === "production", // Configuração para produção
+      secure: env.NODE_ENV === "production",
       sameSite: "strict", // Segurança adicional para cookies
     })
   })
@@ -75,6 +75,7 @@ declare module "fastify" {
     signUser: (payload: { sub: string }) => Promise<void>
     signOut: () => void
   }
+
   interface FastifyInstance {
     getCurrentUser: (request: FastifyRequest) => Promise<{ sub: string }>
   }
