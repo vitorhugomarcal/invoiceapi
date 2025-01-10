@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken"
-import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
+import { FastifyReply, FastifyRequest, type FastifyInstance } from "fastify"
 import { env } from "@/env"
-import { app } from "@/app"
 
 // Erros personalizados
 class UnauthorizedError extends Error {
@@ -14,12 +13,10 @@ class UnauthorizedError extends Error {
 const JWT_SECRET_KEY = env.JWT_SECRET
 
 // Plugin de autenticação
-export async function authentication() {
+export async function authentication(app: FastifyInstance) {
   // Função para obter o usuário atual
   app.decorate("getCurrentUser", async function (request: FastifyRequest) {
     const token = request.cookies.auth
-
-    console.log("TOKEN =>", token)
 
     if (!token) {
       throw new UnauthorizedError()
@@ -27,9 +24,6 @@ export async function authentication() {
 
     try {
       const payload = jwt.verify(token, JWT_SECRET_KEY) as { sub: string }
-
-      console.log("PAYLOAD =>", payload)
-
       return payload
     } catch (error) {
       throw new UnauthorizedError()
@@ -39,11 +33,7 @@ export async function authentication() {
   // Função para assinar JWT e definir cookie
   app.decorate(
     "signUser",
-    async function (
-      this: FastifyInstance,
-      reply: FastifyReply,
-      payload: { sub: string }
-    ) {
+    async function (reply: FastifyReply, payload: { sub: string }) {
       const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "7d" })
 
       reply.setCookie("auth", token, {
@@ -55,12 +45,9 @@ export async function authentication() {
   )
 
   // Função para remover o cookie de autenticação
-  app.decorate(
-    "signOut",
-    function (this: FastifyInstance, reply: FastifyReply) {
-      reply.clearCookie("auth", { path: "/" })
-    }
-  )
+  app.decorate("signOut", function (reply: FastifyReply) {
+    reply.clearCookie("auth", { path: "/" })
+  })
 
   // Tratamento de erros personalizados
   app.setErrorHandler((error, request, reply) => {

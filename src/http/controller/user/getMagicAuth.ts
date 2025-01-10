@@ -28,15 +28,6 @@ export async function getMagicAuth(
 
     const authLink = await prisma.authLinks.findFirst({
       where: { code },
-      // include: {
-      //   user: {
-      //     select: {
-      //       id: true,
-      //       email: true,
-      //       isActive: true,
-      //     }
-      //   }
-      // }
     })
 
     if (!authLink) {
@@ -46,14 +37,6 @@ export async function getMagicAuth(
         401
       )
     }
-
-    // if (!authLink.user.isActive) {
-    //   throw new AuthError(
-    //     "Conta de usuário desativada",
-    //     "INACTIVE_USER",
-    //     403
-    //   )
-    // }
 
     const isExpired = dayjs().diff(authLink.createdAt, "minutes") > 15
 
@@ -74,13 +57,12 @@ export async function getMagicAuth(
       where: { id: authLink.id },
     })
 
-    // Atualizar último login
-    // await prisma.user.update({
-    //   where: { id: authLink.userId },
-    //   data: { lastLoginAt: new Date() }
-    // }).catch(console.error)
-
     // Gerar e salvar o token no cookie usando o plugin de autenticação
+    if (typeof reply.signUser !== "function") {
+      throw new Error(
+        "O método `signUser` não foi registrado corretamente no FastifyReply."
+      )
+    }
     await reply.signUser({ sub: authLink.userId })
 
     // Redirecionar ou retornar resposta
@@ -108,7 +90,9 @@ export async function getMagicAuth(
       })
     }
 
-    console.error("Erro não esperado na autenticação:", error)
+    console.error("Erro inesperado na autenticação:", {
+      error,
+    })
 
     return reply.status(500).send({
       code: "INTERNAL_ERROR",
@@ -120,9 +104,6 @@ export async function getMagicAuth(
 
 // Extensão dos tipos do Fastify
 declare module "fastify" {
-  interface FastifyInstance {
-    signUser: (payload: { sub: string }) => Promise<void>
-  }
   interface FastifyReply {
     signUser: (payload: { sub: string }) => Promise<void>
   }
