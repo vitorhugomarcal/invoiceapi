@@ -138,7 +138,7 @@ export async function createMagicAuth(
     })
 
     // Generate magic link
-    const magicLink = new URL("/auth/magic-link", env.API_BASE_URL)
+    const magicLink = new URL("/auth/verify", env.API_BASE_URL)
     magicLink.searchParams.set("code", authLinkCode)
     magicLink.searchParams.set("redirect", env.AUTH_REDIRECT_URL)
 
