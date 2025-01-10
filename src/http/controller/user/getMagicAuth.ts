@@ -52,11 +52,7 @@ export async function getMagicAuth(
       )
     }
 
-    // Remover o link usado
-    // await prisma.authLinks.delete({
-    //   where: { id: authLink.id },
-    // })
-
+    // Assinar o JWT e definir o cookie
     await reply.signUser({ sub: authLink.userId })
 
     // Redirecionar ou retornar resposta
