@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken"
-import fastifyCookie from "@fastify/cookie"
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { app } from "@/app"
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "your-secret-key"
