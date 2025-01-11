@@ -35,6 +35,7 @@ const securityConfig = {
   jwt: {
     secret: env.JWT_SECRET,
     withCredentials: true,
+    async: true,
     cookie: {
       cookieName: "auth_token",
       signed: false,
@@ -45,7 +46,6 @@ const securityConfig = {
     sign: {
       expiresIn: "7d",
     },
-    async: true,
   },
 }
 

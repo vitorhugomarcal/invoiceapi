@@ -3,6 +3,8 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 import { PrismaClient } from "@prisma/client"
 import { Resend } from "resend"
+import jwt from "jsonwebtoken"
+import { env } from "@/env"
 
 const prisma = new PrismaClient()
 const resend = new Resend(process.env.RESEND_API)
@@ -10,6 +12,9 @@ const resend = new Resend(process.env.RESEND_API)
 const createMagicAuthSchema = z.object({
   email: z.string().email(),
 })
+
+const JWT_SECRET = env.JWT_SECRET
+const MAGIC_LINK_EXPIRATION = "7d"
 
 export async function createMagicAuth(
   request: FastifyRequest,
@@ -22,7 +27,6 @@ export async function createMagicAuth(
       where: { email },
     })
 
-    // Se não encontrar o usuário, retorna erro
     if (!user) {
       return reply.status(400).send({
         code: "USER_NOT_FOUND",
@@ -31,18 +35,9 @@ export async function createMagicAuth(
     }
 
     // Criar token JWT temporário
-    const token = await reply.jwtSign(
-      {
-        userId: user.id,
-        email: user.email,
-      },
-      {
-        sign: {
-          sub: user.id,
-          expiresIn: "15m",
-        },
-      }
-    )
+    const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, {
+      expiresIn: MAGIC_LINK_EXPIRATION,
+    })
 
     const magicLink = `${process.env.API_BASE_URL}/auth/verify?token=${token}&redirect=${process.env.AUTH_REDIRECT_URL}`
 
@@ -62,17 +57,9 @@ export async function createMagicAuth(
       message: "Magic link enviado com sucesso!",
     })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return reply.status(400).send({
-        code: "VALIDATION_ERROR",
-        message: "Email inválido.",
-      })
-    }
-
-    console.error("Erro ao criar link de autenticação:", error)
-    return reply.status(500).send({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Erro interno do servidor.",
+    console.error("Erro ao processar magic link:", error)
+    return reply.status(400).send({
+      error: "Erro ao processar sua solicitação",
     })
   }
 }

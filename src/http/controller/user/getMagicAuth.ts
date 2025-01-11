@@ -3,6 +3,8 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { prisma } from "@/lib/prisma"
 import dayjs from "dayjs"
 import { z } from "zod"
+import jwt from "jsonwebtoken"
+import { env } from "@/env"
 
 // Schema para validação dos query params
 const authQuerySchema = z.object({
@@ -10,14 +12,8 @@ const authQuerySchema = z.object({
   redirect: z.string().default("/"),
 })
 
-interface authTokenSchema {
-  role: string
-  type: string
-  signIn: {
-    sub: string
-    expiresIn: string
-  }
-}
+const JWT_SECRET = env.JWT_SECRET
+const TOKEN_EXPIRATION = "7m"
 
 export async function getMagicAuth(
   request: FastifyRequest,
@@ -55,17 +51,15 @@ export async function getMagicAuth(
     }
 
     // Gera o token JWT
-    const authToken: string = reply.jwtSign(
+    const authToken = jwt.sign(
       {
         userId: authLink.user.id,
         role: authLink.user.role,
         type: authLink.user.type,
       },
+      JWT_SECRET,
       {
-        sign: {
-          sub: authLink.user.id,
-          expiresIn: "7d",
-        },
+        expiresIn: TOKEN_EXPIRATION,
       }
     )
 
