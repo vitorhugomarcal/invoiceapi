@@ -15,7 +15,7 @@ export async function verifyJWT(request: FastifyRequest, reply: FastifyReply) {
     } catch (error) {
       // Se o token for inválido, limpa o cookie e redireciona
       reply.clearCookie("auth_token", {
-        path: "/",
+        path: "/sign-in",
       })
       return reply.status(401).redirect("/sign-in")
     }
