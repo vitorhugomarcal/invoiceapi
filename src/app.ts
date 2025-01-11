@@ -39,7 +39,7 @@ const securityConfig = {
       cookieName: "auth_token",
       signed: false,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "strict" as const,
     },
     sign: {
