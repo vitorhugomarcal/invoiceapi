@@ -6,6 +6,8 @@ export async function verifyJWT(request: FastifyRequest, reply: FastifyReply) {
     // Tenta pegar o token do cookie
     const token = request.cookies.auth_token
 
+    console.log("TOKEN =>", token)
+
     if (!token) {
       return reply.status(401).redirect("/sign-in")
     }

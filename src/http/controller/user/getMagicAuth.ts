@@ -63,8 +63,6 @@ export async function getMagicAuth(
       }
     )
 
-    console.log("AUTHTOKEN => ", authToken)
-
     // Salva o token nos cookies
     reply.setCookie("auth_token", authToken, {
       path: "/",
