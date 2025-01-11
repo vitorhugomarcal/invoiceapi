@@ -1,65 +1,93 @@
 // src/http/controllers/users/getMagicAuth.ts
 import { FastifyReply, FastifyRequest } from "fastify"
-import { PrismaClient } from "@prisma/client"
-import { verifyToken } from "@/utils/verify-token"
+import { prisma } from "@/lib/prisma"
+import dayjs from "dayjs"
+import { z } from "zod"
 
-const prisma = new PrismaClient()
+// Schema para validação dos query params
+const authQuerySchema = z.object({
+  token: z.string(),
+  redirect: z.string().default("/"),
+})
+
+interface authTokenSchema {
+  role: string
+  type: string
+  signIn: {
+    sub: string
+    expiresIn: string
+  }
+}
 
 export async function getMagicAuth(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
-    const { token } = request.query as { token?: string }
+    // Valida os parâmetros da query
+    const { token, redirect } = authQuerySchema.parse(request.query)
 
-    if (!token) {
-      return reply.redirect(
-        `${process.env.AUTH_REDIRECT_URL}/login?error=token-missing`
-      )
-    }
-
-    // Usar o utilitário para verificar o token
-    const decoded = verifyToken(token)
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.sub },
+    // Busca o link de autenticação no banco
+    const authLink = await prisma.authLinks.findUnique({
+      where: { token },
+      include: {
+        user: true,
+      },
     })
 
-    if (!user) {
-      return reply.redirect(
-        `${process.env.AUTH_REDIRECT_URL}/login?error=user-not-found`
-      )
+    if (!authLink) {
+      return reply.redirect(`/sign-in?error=invalid-link`)
     }
 
-    // Gerar token de autenticação de 7 dias
-    const authToken = await reply.jwtSign(
+    // Verifica se o link expirou (7 dias)
+    if (dayjs().diff(authLink.createdAt, "days") > 7) {
+      // Deleta o link expirado
+      await prisma.authLinks.delete({
+        where: { token },
+      })
+
+      return reply.redirect(`/sign-in?error=expired-link`)
+    }
+
+    // Verifica se o usuário existe
+    if (!authLink.user) {
+      return reply.redirect(`/sign-in?error=user-not-found`)
+    }
+
+    // Gera o token JWT
+    const authToken: string = reply.jwtSign(
       {
-        role: user.role,
-        type: user.type,
+        role: authLink.user.role,
+        type: authLink.user.type,
       },
       {
         sign: {
-          sub: user.id,
+          sub: authLink.user.id,
           expiresIn: "7d",
         },
       }
     )
 
-    // Configurar o cookie com o token
+    console.log("AUTHTOKEN => ", authToken)
+
+    // Salva o token nos cookies
     reply.setCookie("auth_token", authToken, {
       path: "/",
       secure: true,
       sameSite: "lax",
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+      maxAge: 7 * 24 * 60 * 60, // 7 dias em segundos
     })
 
-    // Redirecionar para a página inicial
-    return reply.redirect(`${process.env.AUTH_REDIRECT_URL}/`)
+    // Deleta o link usado
+    await prisma.authLinks.delete({
+      where: { token },
+    })
+
+    // Redireciona para a URL especificada
+    return reply.redirect(redirect)
   } catch (error) {
-    console.error("Erro ao verificar token:", error)
-    return reply.redirect(
-      `${process.env.AUTH_REDIRECT_URL}/login?error=invalid-token`
-    )
+    console.error("Erro ao autenticar link:", error)
+    return reply.redirect(`/sign-in?error=invalid-token`)
   }
 }

@@ -43,8 +43,9 @@ const securityConfig = {
       sameSite: "strict" as const,
     },
     sign: {
-      expiresIn: "10m",
+      expiresIn: "7d",
     },
+    async: true,
   },
 }
 

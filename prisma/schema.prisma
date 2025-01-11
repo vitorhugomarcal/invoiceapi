@@ -21,6 +21,8 @@ model User {
   Company Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
 
   PendingUserInvites PendingUser[]
+  // AuthLinks          AuthLinks[]
+  AuthLinks          AuthLinks[]
 
   @@map("users")
 }
@@ -233,10 +235,12 @@ model EstimateItems {
 
 model AuthLinks {
   id        String   @id @default(uuid())
-  code      String   @unique
-  userId    String
+  token     String   @unique
   createdAt DateTime @default(now())
-  expiresAt DateTime @default(now())
+  expiresAt DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
   @@map("auth_links")
 }
