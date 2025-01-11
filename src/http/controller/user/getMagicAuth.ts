@@ -57,6 +57,7 @@ export async function getMagicAuth(
     // Gera o token JWT
     const authToken: string = reply.jwtSign(
       {
+        userId: authLink.user.id,
         role: authLink.user.role,
         type: authLink.user.type,
       },

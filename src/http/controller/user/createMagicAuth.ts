@@ -18,13 +18,15 @@ export async function createMagicAuth(
   try {
     const { email } = createMagicAuthSchema.parse(request.body)
 
-    let user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     })
 
+    // Se não encontrar o usuário, retorna erro
     if (!user) {
-      user = await prisma.user.create({
-        data: { email },
+      return reply.status(400).send({
+        code: "USER_NOT_FOUND",
+        message: "Usuário não cadastrado.",
       })
     }
 
@@ -42,7 +44,7 @@ export async function createMagicAuth(
       }
     )
 
-    const magicLink = `${process.env.API_BASE_URL}/auth/verify?token=${token}`
+    const magicLink = `${process.env.API_BASE_URL}/auth/verify?token=${token}&redirect=${process.env.AUTH_REDIRECT_URL}`
 
     await resend.emails.send({
       from: "no-reply@update.ipsec.com.br",
@@ -60,9 +62,17 @@ export async function createMagicAuth(
       message: "Magic link enviado com sucesso!",
     })
   } catch (error) {
-    console.error("Erro ao processar magic link:", error)
-    return reply.status(400).send({
-      error: "Erro ao processar sua solicitação",
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send({
+        code: "VALIDATION_ERROR",
+        message: "Email inválido.",
+      })
+    }
+
+    console.error("Erro ao criar link de autenticação:", error)
+    return reply.status(500).send({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro interno do servidor.",
     })
   }
 }
