@@ -20,7 +20,7 @@ import { AppError } from "./utils/AppError"
 import { authentication } from "./lib/authentication"
 import { env } from "./env"
 
-const ALLOWED_ORIGINS = "http://192.168.1.80:5173"
+const ALLOWED_ORIGINS = "http://localhost:5173"
 
 export const app = fastify()
 
