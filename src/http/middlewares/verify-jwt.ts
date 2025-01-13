@@ -16,6 +16,8 @@ export async function verifyJwt(request: FastifyRequest, reply: FastifyReply) {
     // Pega o token do cookie
     const token = request.cookies.auth_token
 
+    console.log("TOKEN => ", token)
+
     if (!token) {
       return reply.status(401).send({ message: "Token não fornecido." })
     }
@@ -35,12 +37,5 @@ export async function verifyJwt(request: FastifyRequest, reply: FastifyReply) {
     }
 
     return reply.status(500).send({ message: "Erro na verificação do token." })
-  }
-}
-
-// Extensão dos tipos do Fastify
-declare module "fastify" {
-  interface FastifyRequest {
-    user: JWTPayload
   }
 }

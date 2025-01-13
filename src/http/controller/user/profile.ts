@@ -16,6 +16,7 @@ const profileResponseSchema = z.object({
 
 export async function profile(request: FastifyRequest, reply: FastifyReply) {
   try {
+    console.log("Request user:", request.user)
     const { userId } = request.user
 
     const user = await prisma.user.findUnique({
