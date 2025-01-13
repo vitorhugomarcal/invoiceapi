@@ -1,21 +1,22 @@
 // src/http/controllers/users/profile.ts
 import { FastifyRequest, FastifyReply } from "fastify"
 import { prisma } from "@/lib/prisma"
+import { z } from "zod"
 
-// Definição do tipo para o usuário JWT
-interface UserJWTPayload {
-  userId: string
-  role?: string
-  type?: string
-}
+// Schema para validação da resposta
+const profileResponseSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  email: z.string().email(),
+  role: z.string().nullable(),
+  type: z.string().nullable(),
+  company_id: z.string().nullable(),
+  createdAt: z.string(),
+})
 
 export async function profile(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { userId } = request.user as UserJWTPayload
-
-    if (!userId) {
-      return reply.status(401).send({ message: "Token inválido." })
-    }
+    const { userId } = request.user
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -31,17 +32,34 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
     })
 
     if (!user) {
-      return reply.status(404).send({ message: "Usuário não encontrado." })
+      return reply.status(404).send({
+        code: "USER_NOT_FOUND",
+        message: "Usuário não encontrado.",
+      })
     }
 
+    // Validação da resposta
+    const validatedResponse = profileResponseSchema.parse({
+      ...user,
+      createdAt: user.createdAt.toISOString(),
+    })
+
     return reply.status(200).send({
-      user: {
-        ...user,
-        createdAt: user.createdAt.toISOString(),
-      },
+      user: validatedResponse,
     })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send({
+        code: "VALIDATION_ERROR",
+        message: "Erro na validação dos dados.",
+        errors: error.errors,
+      })
+    }
+
     console.error("Erro ao buscar perfil:", error)
-    return reply.status(500).send({ message: "Erro interno do servidor." })
+    return reply.status(500).send({
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor.",
+    })
   }
 }

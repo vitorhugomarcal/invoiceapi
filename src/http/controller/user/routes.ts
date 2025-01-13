@@ -3,7 +3,6 @@ import { register } from "./register"
 import { getUserById } from "./getUserById"
 import { update } from "./update"
 import { updateRole } from "./updateRole"
-import { verifyJWT } from "@/http/middlewares/verify-jwt"
 import { authenticate } from "./authenticate"
 import { refresh } from "./refresh"
 import { remove } from "./remove"
@@ -11,6 +10,7 @@ import { profile } from "./profile"
 import { updateType } from "./updateType"
 import { createMagicAuth } from "./createMagicAuth"
 import { getMagicAuth } from "./getMagicAuth"
+import { verifyJwt } from "@/http/middlewares/verify-jwt"
 
 export async function userRoutes(app: FastifyInstance) {
   app.post("/users", register)
@@ -20,8 +20,8 @@ export async function userRoutes(app: FastifyInstance) {
   app.post("/auth/magic-link", createMagicAuth)
   app.get("/auth/verify", getMagicAuth)
 
-  app.get("/me", { onRequest: [verifyJWT] }, profile)
-  app.get("/users/:userId", { onRequest: [verifyJWT] }, getUserById)
+  app.get("/me", { onRequest: [verifyJwt] }, profile)
+  app.get("/users/:userId", { onRequest: [verifyJwt] }, getUserById)
   app.put("/users/:userId", update)
   app.patch("/users/role/:userId", updateRole)
   app.patch("/users/type/:userId", updateType)

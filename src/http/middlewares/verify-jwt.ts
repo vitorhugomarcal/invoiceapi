@@ -1,27 +1,46 @@
-// src/http/middlewares/verify-jwt.ts
+// src/http/middlewares/verifyJwt.ts
 import { FastifyReply, FastifyRequest } from "fastify"
+import { env } from "@/env"
+import jwt from "jsonwebtoken"
 
-export async function verifyJWT(request: FastifyRequest, reply: FastifyReply) {
+interface JWTPayload {
+  userId: string
+  email: string
+  sub: string
+  role?: string
+  type?: string
+}
+
+export async function verifyJwt(request: FastifyRequest, reply: FastifyReply) {
   try {
-    // Tenta pegar o token do cookie
+    // Pega o token do cookie
     const token = request.cookies.auth_token
 
-    console.log("TOKEN =>", token)
-
     if (!token) {
-      return reply.status(401).redirect("/sign-in")
+      return reply.status(401).send({ message: "Token não fornecido." })
     }
 
-    try {
-      await request.jwtVerify()
-    } catch (error) {
-      // Se o token for inválido, limpa o cookie e redireciona
-      reply.clearCookie("auth_token", {
-        path: "/sign-in",
-      })
-      return reply.status(401).redirect("/sign-in")
+    // Verifica e decodifica o token
+    const payload = jwt.verify(token, env.JWT_SECRET) as JWTPayload
+
+    // Adiciona os dados do usuário ao request
+    request.user = payload
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return reply.status(401).send({ message: "Token inválido." })
     }
-  } catch (err) {
-    return reply.status(401).redirect("/sign-in")
+
+    if (error instanceof jwt.TokenExpiredError) {
+      return reply.status(401).send({ message: "Token expirado." })
+    }
+
+    return reply.status(500).send({ message: "Erro na verificação do token." })
+  }
+}
+
+// Extensão dos tipos do Fastify
+declare module "fastify" {
+  interface FastifyRequest {
+    user: JWTPayload
   }
 }
