@@ -14,9 +14,10 @@ interface JWTPayload {
 export async function verifyJwt(request: FastifyRequest, reply: FastifyReply) {
   try {
     // Pega o token do cookie
+    console.log("All cookies:", request.cookies)
+    console.log("Headers:", request.headers)
     const token = request.cookies.auth_token
-
-    console.log("TOKEN => ", token)
+    console.log("Auth token:", token)
 
     if (!token) {
       return reply.status(401).send({ message: "Token não fornecido." })

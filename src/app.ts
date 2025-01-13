@@ -30,6 +30,7 @@ const securityConfig = {
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+    exposedHeaders: ["set-cookie"],
     maxAge: 86400, // 24 hours
   },
   jwt: {
@@ -40,7 +41,6 @@ const securityConfig = {
       signed: false,
       httpOnly: true,
       secure: true,
-      sameSite: "strict" as const,
     },
     sign: {
       expiresIn: "7d",

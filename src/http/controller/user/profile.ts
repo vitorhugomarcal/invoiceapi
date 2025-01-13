@@ -19,6 +19,7 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
     console.log("Request user:", request.user)
     const { userId } = request.user
 
+    console.log("Finding user with ID:", userId)
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -31,6 +32,8 @@ export async function profile(request: FastifyRequest, reply: FastifyReply) {
         createdAt: true,
       },
     })
+
+    console.log("Found user:", user)
 
     if (!user) {
       return reply.status(404).send({
