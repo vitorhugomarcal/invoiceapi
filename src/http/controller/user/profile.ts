@@ -4,14 +4,14 @@ import { prisma } from "@/lib/prisma"
 
 // Definição do tipo para o usuário JWT
 interface UserJWTPayload {
-  sub: string
+  userId: string
   role?: string
   type?: string
 }
 
 export async function profile(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { sub: userId } = request.user as UserJWTPayload
+    const { userId } = request.user as UserJWTPayload
 
     if (!userId) {
       return reply.status(401).send({ message: "Token inválido." })

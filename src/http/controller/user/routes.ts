@@ -20,7 +20,7 @@ export async function userRoutes(app: FastifyInstance) {
   app.post("/auth/magic-link", createMagicAuth)
   app.get("/auth/verify", getMagicAuth)
 
-  app.get("/me", { preHandler: [verifyJWT] }, profile)
+  app.get("/me", { onRequest: [verifyJWT] }, profile)
   app.get("/users/:userId", { onRequest: [verifyJWT] }, getUserById)
   app.put("/users/:userId", update)
   app.patch("/users/role/:userId", updateRole)
