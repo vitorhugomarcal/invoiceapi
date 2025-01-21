@@ -2,15 +2,15 @@ import { prisma } from "@/lib/prisma"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 
-export async function registerUser(
+export async function registerCompany(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const registerBodySchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { userId } = registerBodySchema.parse(request.body)
+  const { companyId } = registerBodySchema.parse(request.body)
 
   const supplierParamsSchema = z.object({
     supplierId: z.string(),
@@ -28,17 +28,17 @@ export async function registerUser(
   }
 
   // Verifica se o usuário existe
-  const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (!user) {
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+  if (!company) {
     return reply.status(404).send({ error: "User not found" })
   }
 
   // Verifica se a associação já existe entre o fornecedor e o usuário
   const supplierUserExists = await prisma.supplierUser.findUnique({
     where: {
-      supplier_id_user_id: {
+      supplier_id_company_id: {
         supplier_id: supplierId,
-        user_id: userId,
+        company_id: companyId,
       },
     },
   })
@@ -53,7 +53,7 @@ export async function registerUser(
   await prisma.supplierUser.create({
     data: {
       supplier_id: supplierId,
-      user_id: userId,
+      company_id: companyId,
     },
   })
 

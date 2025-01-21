@@ -3,26 +3,24 @@ import { makeGetUserProfileEmailUseCase } from "@/use-cases/factories/make-user-
 import { FastifyRequest, FastifyReply } from "fastify"
 import { z } from "zod"
 
-export async function getCompanyByEmail(
+export async function getClientsByCompany(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const companyParamsSchema = z.object({
-    email: z.string(),
+  const clientParamsSchema = z.object({
+    companyId: z.string(),
   })
 
-  const { email } = companyParamsSchema.parse(request.params)
+  const { companyId } = clientParamsSchema.parse(request.params)
 
-  if (!email) {
+  if (!companyId) {
     return reply.status(400).send({ error: "Missing email" })
-  } else {
-    const company = await prisma.company.findFirst({
-      where: {
-        user: {
-          email,
-        },
-      },
-    })
-    return company
   }
+
+  const clients = await prisma.client.findMany({
+    where: {
+      company_id: companyId,
+    },
+  })
+  return clients
 }

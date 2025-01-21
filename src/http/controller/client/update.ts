@@ -41,32 +41,32 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
 
   if (!id) {
     return reply.status(400).send({ error: "Missing userId" })
-  } else {
-    const client = await prisma.client.findUnique({
-      where: { id },
-    })
-    if (!client) {
-      return reply.status(404).send({ error: "User not found" })
-    } else {
-      await prisma.client.update({
-        where: { id },
-        data: {
-          cpf,
-          cnpj,
-          company_name,
-          name,
-          address,
-          address_number,
-          cep,
-          city,
-          state,
-          phone,
-          neighborhood,
-          email_address,
-        },
-      })
-    }
   }
 
+  const client = await prisma.client.findUnique({
+    where: { id },
+  })
+
+  if (!client) {
+    return reply.status(404).send({ error: "User not found" })
+  }
+
+  const updatedClient = await prisma.client.update({
+    where: { id },
+    data: {
+      cpf,
+      cnpj,
+      company_name,
+      name,
+      address,
+      address_number,
+      cep,
+      city,
+      state,
+      phone,
+      neighborhood,
+      email_address,
+    },
+  })
   return reply.status(204).send()
 }

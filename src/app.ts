@@ -1,44 +1,59 @@
-import { env } from "./env"
 import "@/utils/dayjsLocaleConfig"
 
-import fastify from "fastify"
+import fastify, { type FastifyReply, type FastifyRequest } from "fastify"
 import cors from "@fastify/cors"
 import { fastifyJwt } from "@fastify/jwt"
+import { fastifyCookie } from "@fastify/cookie"
 
 import { userRoutes } from "./http/controller/user/routes"
-import { fastifyCookie } from "@fastify/cookie"
-import { AppError } from "./utils/AppError"
-import { companyRoutes } from "./http/controller/company/routes"
-import { clientRoutes } from "./http/controller/client/routes"
-import { invoiceItemsRoutes } from "./http/controller/invoiceItems/routes"
-import { invoiceRoutes } from "./http/controller/invoice/routes"
 import { ItensRoutes } from "./http/controller/Itens/routes"
 import { UnitsRoutes } from "./http/controller/Units/routes"
+import { clientRoutes } from "./http/controller/client/routes"
+import { companyRoutes } from "./http/controller/company/routes"
+import { invoiceRoutes } from "./http/controller/invoice/routes"
 import { supplierRoutes } from "./http/controller/supplier/routes"
-import { estimateItemsRoutes } from "./http/controller/estimateItems/routes"
 import { estimateRoutes } from "./http/controller/estimate/routes"
+import { invoiceItemsRoutes } from "./http/controller/invoiceItems/routes"
+import { estimateItemsRoutes } from "./http/controller/estimateItems/routes"
+
+import { AppError } from "./utils/AppError"
+import { authentication } from "./lib/authentication"
+import { env } from "./env"
+
+const ALLOWED_ORIGINS = "https://www.orbizy.app"
 
 export const app = fastify()
 
-app.register(cors, {
-  origin: "*", // specify allowed origins
-  methods: ["GET", "POST", "PUT", "DELETE"], // specify allowed methods
-  allowedHeaders: ["Content-Type", "Authorization"], // specify allowed headers
-  credentials: true, // include credentials such as cookies in requests
-})
+const securityConfig = {
+  cors: {
+    origin: ALLOWED_ORIGINS,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    exposedHeaders: ["set-cookie"],
+    maxAge: 86400, // 24 hours
+  },
+  jwt: {
+    secret: env.JWT_SECRET,
+    withCredentials: true,
+    cookie: {
+      cookieName: "auth_token",
+      signed: false,
+      httpOnly: true,
+      secure: true,
+    },
+    sign: {
+      expiresIn: "7d",
+    },
+  },
+}
 
-app.register(fastifyJwt, {
+app.register(authentication)
+app.register(cors, securityConfig.cors)
+app.register(fastifyJwt, securityConfig.jwt)
+app.register(fastifyCookie, {
   secret: env.JWT_SECRET,
-  cookie: {
-    cookieName: "refreshToken",
-    signed: false,
-  },
-  sign: {
-    expiresIn: "30d",
-  },
 })
-
-app.register(fastifyCookie)
 
 app.register(userRoutes)
 app.register(ItensRoutes)

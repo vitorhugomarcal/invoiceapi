@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 
-export async function registerByUser(
+export async function registerByCompany(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
@@ -13,19 +13,19 @@ export async function registerByUser(
   const { name } = registerBodySchema.parse(request.body)
 
   const itemParamsSchema = z.object({
-    userId: z.string(),
+    companyId: z.string(),
   })
 
-  const { userId } = itemParamsSchema.parse(request.params)
+  const { companyId } = itemParamsSchema.parse(request.params)
 
-  const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (!user) {
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+  if (!company) {
     return reply.status(404).send({ error: "User not found" })
   }
 
   const unit = await prisma.unitTypeCustom.create({
     data: {
-      user_id: user.id,
+      company_id: company.id,
       name,
     },
   })

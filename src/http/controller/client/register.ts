@@ -36,20 +36,20 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
   } = registerBodySchema.parse(request.body)
 
   const userParamsSchema = z.object({
-    email: z.string(),
+    companyId: z.string(),
   })
 
-  const { email } = userParamsSchema.parse(request.params)
+  const { companyId } = userParamsSchema.parse(request.params)
 
-  const user = await prisma.user.findUnique({ where: { email } })
-  if (!user) {
-    return reply.status(404).send({ error: "User not found" })
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+
+  if (!company) {
+    return reply.status(404).send({ error: "Company not found" })
   }
-
   // Agora verifica se o cliente já existe para o usuário específico
   const existingClient = await prisma.client.findFirst({
     where: {
-      user_id: user.id,
+      company_id: company.id,
       AND: [{ cpf: cpf ?? undefined }, { cnpj: cnpj ?? undefined }],
     },
   })
@@ -61,9 +61,9 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       .send({ error: "Client already exists for this user" })
   }
 
-  await prisma.client.create({
+  const client = await prisma.client.create({
     data: {
-      user_id: user.id,
+      company_id: company.id,
       type,
       cpf,
       company_name,
@@ -79,5 +79,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       state,
     },
   })
-  return reply.status(201).send()
+
+  return reply.status(201).send(client)
 }

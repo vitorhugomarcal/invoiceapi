@@ -5,13 +5,16 @@ import { remove } from "./remove"
 import { register } from "./register"
 import { getByEstimate } from "./getByEstimate"
 import { getEstimateBySupplier } from "./getEstimateBySupplier"
-import { getAllByUser } from "./getAllByUser"
+import { getAllByCompany } from "./getAllByCompany"
 
 export async function estimateRoutes(app: FastifyInstance) {
-  app.post("/estimate/:supplierId/:userId", register)
-  app.put("/estimate/:estimateId", update)
-  app.delete("/estimate/:estimateId", remove)
+  app.post("/estimate/:supplierId/:companyId", register)
+
   app.get("/estimate/:estimateId", getByEstimate)
-  app.get("/estimates/supplier/:supplierId/:userId", getEstimateBySupplier)
-  app.get("/estimates/:userId", getAllByUser)
+  app.get("/estimates/supplier/:supplierId/:companyId", getEstimateBySupplier)
+  app.get("/estimates/:companyId", getAllByCompany)
+
+  app.put("/estimate/:estimateId", update)
+
+  app.delete("/estimate/:estimateId", remove)
 }

@@ -14,16 +14,16 @@ export async function getByEstimate(
 
   if (!estimateId) {
     return reply.status(400).send({ error: "Missing estimateId" })
-  } else {
+  }
     const estimateItems = await prisma.estimateItems.findMany({
       where: {
         estimate_id: estimateId,
       },
     })
+    
     if (!estimateItems) {
       return []
     } else {
-      return estimateItems
+      return reply.status(400).send(estimateItems)
     }
-  }
 }
