@@ -20,7 +20,7 @@ import { AppError } from "./utils/AppError"
 import { authentication } from "./lib/authentication"
 import { env } from "./env"
 
-const ALLOWED_ORIGINS = "http://192.168.1.80:5173"
+const ALLOWED_ORIGINS = "https://www.orbizy.app"
 
 export const app = fastify()
 
@@ -40,7 +40,7 @@ const securityConfig = {
       cookieName: "auth_token",
       signed: false,
       httpOnly: true,
-      secure: false,
+      secure: true,
     },
     sign: {
       expiresIn: "7d",

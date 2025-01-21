@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "auth_links" ADD COLUMN     "expiresAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
